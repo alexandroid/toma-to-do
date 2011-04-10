@@ -1,0 +1,10 @@
+task {
+   display: block;
+}
+task img {
+   height:3em;
+   margin-bottom:-1em;
+}
+task input,button {
+   font-size: 2em;
+}
