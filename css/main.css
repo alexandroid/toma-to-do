@@ -1,13 +1,12 @@
-.task {
+.task, .inactivetask, .activetask, .donetask {
    display: block;
    /* border-style:solid; border-width:1px; */
 }
-.task img {
-   height:3em;
-   margin-bottom:-1em;
+.task *,.inactivetask *,.activetask *,.donetask * {
+   font-size: xx-large;
 }
-.task input,button,.timer {
-   font-size: 2em;
+.pom {
+   margin-bottom: -15px;
 }
 .controls {
    display:inline;
@@ -15,6 +14,25 @@
 .controls * {
    visibility:hidden;
 }
-.task:hover * {
+.task:hover .controls * {
    visibility:visible;
+}
+.task:hover .controls .rest {
+   visibility:hidden;
+}
+.activetask .controls * {
+   visibility:visible;
+}
+.activetask .controls button {
+   visibility:hidden;
+   display:none;
+}
+.donetask .controls * {
+   visibility:visible;
+}
+.donetask .controls .work {
+   display:none;
+}
+.donetask .controls .rest {
+   display:inline;
 }
