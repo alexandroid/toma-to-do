@@ -1,8 +1,8 @@
-.task, .inactivetask, .activetask, .donetask {
+.task, .inactivetask, .workingtask, .resttask, .restingtask {
    display: block;
    /* border-style:solid; border-width:1px; */
 }
-.task *,.inactivetask *,.activetask *,.donetask * {
+.task *,.inactivetask *,.workingtask *,.resttask *,.restingtask * {
    font-size: xx-large;
 }
 .pom {
@@ -17,22 +17,24 @@
 .task:hover .controls * {
    visibility:visible;
 }
-.task:hover .controls .rest {
-   visibility:hidden;
-}
-.activetask .controls * {
-   visibility:visible;
-}
-.activetask .controls button {
-   visibility:hidden;
+.task:hover .controls .rest, .task:hover .controls .pomrest {
+   /*visibility:hidden;*/
    display:none;
 }
-.donetask .controls * {
+.workingtask .controls *, .resttask .controls *, .restingtask .controls * {
    visibility:visible;
 }
-.donetask .controls .work {
+.workingtask .controls button,
+.restingtask .controls button,
+.workingtask .controls .pomrest,
+.restingtask .controls .pomwork,
+.resttask .controls .work,
+.resttask .controls .pomwork {
+   /*visibility:hidden;*/
    display:none;
 }
-.donetask .controls .rest {
+/*
+.resttask .controls .rest {
    display:inline;
 }
+*/

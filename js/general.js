@@ -9,7 +9,7 @@ jQuery(document).ready(function(){
       if( g_isTimerOn ) return;
       
       var thisTask = $(this).closest(".task");
-      thisTask.addClass("activetask").removeClass("task");
+      thisTask.addClass("workingtask").removeClass("task");
       thisTask.parent("article").find(".task").each( function(index) {
          if ($(this) != thisTask) {
             $(this).addClass("inactivetask").removeClass("task");
@@ -17,7 +17,7 @@ jQuery(document).ready(function(){
       });
       
       g_taskTimeElement = thisTask.find(".timer").last();
-      g_secondsLeft = 5;//25*60;
+      g_secondsLeft = getNumberOfSecondsToWork();
       g_isTimerOn = true;
       g_intervalId = setInterval("countDownWork()", 1000);
    });
@@ -25,11 +25,11 @@ jQuery(document).ready(function(){
    $("button.rest").click(function(e){
       if( g_isTimerOn ) return;
       
-      var thisTask = $(this).closest(".donetask");
-      thisTask.addClass("activetask").removeClass("donetask");
+      var thisTask = $(this).closest(".resttask");
+      thisTask.addClass("restingtask").removeClass("resttask");
       
       g_taskTimeElement = thisTask.find(".timer").last();
-      g_secondsLeft = 5;//25*60;
+      g_secondsLeft = getNumberOfSecondsToRest();
       g_isTimerOn = true;
       g_intervalId = setInterval("countDownRest()", 1000);
       
@@ -42,11 +42,11 @@ jQuery(document).ready(function(){
    $("input").keyup(function(e){
       if(e.keyCode == 13){
          var thisTask = $(this).closest(".task");
-         var newTask  = thisTask.clone( true, true );
+         var newTask  = thisTask.clone( true, true ); // with data and events, deep.
          var newInput = newTask.find("input").attr("val", "");
          newTask.children("img").remove();
-         var pom = makePom();
-         pom.insertAfter(newInput);
+         //var pom = makePom();
+         //pom.insertAfter(newInput);
          newTask.insertAfter(thisTask);
          newInput.focus();
       }
@@ -77,40 +77,48 @@ function saveTasksAndPomodoros() {
 }
 
 function makeDonePom() {
-   return $('<img class="pom" src="css/pom50rd.png" />');
+   return $('<img class="pom pomdone" src="css/pom50rd.png" />');
+}
+
+function secondsToTime(seconds) {
+   var min = Math.floor( seconds / 60 );
+   var sec = seconds % 60;
+   var minStr = toTwoDigitString( min );
+   var secStr = toTwoDigitString( sec );
+   return minStr + ':' + secStr;
+}
+
+function getNumberOfSecondsToWork() {
+   return 25*60;
+}
+
+function getNumberOfSecondsToRest() {
+   return 5*60;
 }
 
 function countDownWork() {
    if( --g_secondsLeft > 0 ) {
-      var min = Math.floor( g_secondsLeft / 60 );
-      var sec = g_secondsLeft % 60;
-      var minStr = toTwoDigitString( min );
-      var secStr = toTwoDigitString( sec );
-      g_taskTimeElement.text( minStr + ':' + secStr );
+      g_taskTimeElement.text( secondsToTime( g_secondsLeft ) );
    }
    else {
-      g_taskTimeElement.text( '00:00' );
+      g_taskTimeElement.text( secondsToTime( getNumberOfSecondsToRest() ) );
       clearInterval( g_intervalId );
       g_isTimerOn = false;
-      var thisTask = g_taskTimeElement.closest(".activetask");
-      thisTask.addClass("donetask").removeClass("activetask");
+      var thisTask = g_taskTimeElement.closest(".workingtask");
+      thisTask.addClass("resttask").removeClass("workingtask");
    }
 }
 
 function countDownRest() {
    if( --g_secondsLeft > 0 ) {
-      var min = Math.floor( g_secondsLeft / 60 );
-      var sec = g_secondsLeft % 60;
-      var minStr = toTwoDigitString( min );
-      var secStr = toTwoDigitString( sec );
-      g_taskTimeElement.text( minStr + ':' + secStr );
+      g_taskTimeElement.text( secondsToTime( g_secondsLeft ) );
    }
    else {
-      g_taskTimeElement.text( '00:00' );
+      g_taskTimeElement.text( secondsToTime( getNumberOfSecondsToWork() ) );
       clearInterval( g_intervalId );
       g_isTimerOn = false;
-      var thisTask = g_taskTimeElement.closest(".activetask");
-      thisTask.addClass("task").removeClass("activetask");
+      var thisTask = g_taskTimeElement.closest(".restingtask");
+      thisTask.addClass("task").removeClass("restingtask");
       makeDonePom().insertBefore(g_taskTimeElement.closest(".controls"));
       thisTask.parent("article").find(".inactivetask").each( function(index) {
          if ($(this) != thisTask) {
