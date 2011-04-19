@@ -43,7 +43,7 @@ jQuery(document).ready(function(){
       if(e.keyCode == 13){
          var thisTask = $(this).closest(".task");
          var newTask  = thisTask.clone( true, true ); // with data and events, deep.
-         var newInput = newTask.find("input").attr("val", "");
+         var newInput = newTask.find("input").val("");
          newTask.children("img").remove();
          //var pom = makePom();
          //pom.insertAfter(newInput);
@@ -77,7 +77,7 @@ function saveTasksAndPomodoros() {
 }
 
 function makeDonePom() {
-   return $('<img class="pom pomdone" src="css/pom50rd.png" />');
+   return $('<img class="pom pomdone" src="img/pom50rd.png" />');
 }
 
 function secondsToTime(seconds) {
@@ -99,6 +99,9 @@ function getNumberOfSecondsToRest() {
 function countDownWork() {
    if( --g_secondsLeft > 0 ) {
       g_taskTimeElement.text( secondsToTime( g_secondsLeft ) );
+      if( g_secondsLeft == 1 ) {
+         g_ringSound.play();
+      }
    }
    else {
       g_taskTimeElement.text( secondsToTime( getNumberOfSecondsToRest() ) );
@@ -112,6 +115,9 @@ function countDownWork() {
 function countDownRest() {
    if( --g_secondsLeft > 0 ) {
       g_taskTimeElement.text( secondsToTime( g_secondsLeft ) );
+      if( g_secondsLeft == 1 ) {
+         g_ringSound.play();
+      }
    }
    else {
       g_taskTimeElement.text( secondsToTime( getNumberOfSecondsToWork() ) );

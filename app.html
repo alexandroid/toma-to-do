@@ -12,36 +12,48 @@
 <script src="js/jquery.min.js"></script>
 <!--script src="jquery.cookie.js"></script-->
 <script src="js/jquery.json.min.js"></script>
+<script src="js/soundmanager2-jsmin.js"></script>
 <script src="js/general.js"></script>
+<script type="text/javascript">
+soundManager.url = 'swf/'; // directory where SM2 .SWFs live
+soundManager.debugMode = false;
+
+// Note that SoundManager will determine and append the appropriate .SWF file to the URL,
+// eg. /path/to/sm2-flash-movies/soundmanager2.swf automatically.
+
+// Beta-ish HTML5 audio support (force-enabled for iPad), flash-free sound for Safari + Chrome. Enable if you want to try it!
+// soundManager.useHTML5Audio = true;
+
+soundManager.useFlashBlock = false;
+
+soundManager.onready(function() {
+
+  // SM2 has loaded - now you can create and play sounds!
+  g_ringSound = soundManager.createSound({
+    id: 'eggTimerRing',
+    url: 'snd/eggTimerRing.mp3'
+    // onload: [ event handler function object ],
+    // other options here..
+  });
+});
+</script>
 </head>
 
 <body>
-<h1>Tasks for today</h1>
+<h1>Today's Goals:</h1>
 <article>
 <div class="task">
    <input type="text" />
    <!--img class="pom" src="css/pom50rd.png" /-->
    <div class="controls">
-      <img class="pom pomrest" src="css/pom50gl.png" />
-      <img class="pom pomwork" src="css/pom50gr.png" />
+      <img class="pom pomrest" src="img/pom50gl.png" />
+      <img class="pom pomwork" src="img/pom50gr.png" />
       <span class="timer">25:00</span>
       <button type="button" class="work">do it!</button>
       <button type="button" class="rest">rest!</button>
-   </div>
-</div>
-<div class="task">
-   <input type="text" />
-   <div class="controls">
-      <img class="pom pomrest" src="css/pom50gl.png" />
-      <img class="pom pomwork" src="css/pom50gr.png" />
-      <span class="timer">25:00</span>
-      <button type="button" class="work">do it!</button>
-      <button type="button" class="rest">rest!</button>
+      <!--button type="button" class="alldone">all done!</button-->
    </div>
 </div>
 </article>
-<!--
-<img src="css/pom.jpg" />
-<button type="button" class="add">add</button>
-<button type="button" class="del">del</button>-->
+<!--h1>Completed Goals:</h1-->
 </body>
