@@ -1,0 +1,46 @@
+input {
+   border-style:none;
+   border-bottom-style:solid;
+   border-width:1px;
+   border-color:silver;
+}
+.task, .inactivetask, .workingtask, .resttask, .restingtask {
+   display: block;
+   /* border-style:solid; border-width:1px; */
+}
+.task *,.inactivetask *,.workingtask *,.resttask *,.restingtask * {
+   font-size: xx-large;
+}
+.pom {
+   margin-bottom: -15px;
+}
+.controls {
+   display:inline;
+}
+.controls * {
+   visibility:hidden;
+}
+.task:hover .controls * {
+   visibility:visible;
+}
+.task:hover .controls .rest, .task:hover .controls .pomrest {
+   /*visibility:hidden;*/
+   display:none;
+}
+.workingtask .controls *, .resttask .controls *, .restingtask .controls * {
+   visibility:visible;
+}
+.workingtask .controls button,
+.restingtask .controls button,
+.workingtask .controls .pomrest,
+.restingtask .controls .pomwork,
+.resttask .controls .work,
+.resttask .controls .pomwork {
+   /*visibility:hidden;*/
+   display:none;
+}
+/*
+.resttask .controls .rest {
+   display:inline;
+}
+*/
