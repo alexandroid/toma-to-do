@@ -3,7 +3,8 @@ jQuery(document).ready(function(){
    g_cookieName = "tasksAndPomodoros";
    g_isTimerOn = false;
    g_storageErrorHappened = false;
-   g_timeoutId = null;
+   loadTasksAndPomodoros();
+   g_saveIntervalId = setInterval("saveTasksAndPomodoros()", 3000);
 
    $("button.work").click(function(e){
       if( g_isTimerOn ) return;
@@ -50,17 +51,90 @@ jQuery(document).ready(function(){
          newTask.insertAfter(thisTask);
          newInput.focus();
       }
-      clearTimeout( g_timeoutId );
-      g_timeoutId = setTimeout("saveTasksAndPomodoros()", 1000);
+      clearInterval( g_saveIntervalId );
+      g_saveIntervalId = setInterval("saveTasksAndPomodoros()", 3000);
    });
 });
+
+function clearTasksAndPomodoros() {
+   var article = $("article");
+   var firstTask = article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").first();
+   article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").each( function(index) {
+      if (index != 0) {
+         $(this).children("img").remove();
+         $(this).remove();
+      } else { // index == 0;
+         $(this).find("input").val("");
+         $(this).children("img").remove();
+      }
+   });
+}
+
+function loadTasksAndPomodoros() {
+   
+   var tasksArray = loadTasksAndPomodorosArrayFromLocalStorage();
+   if( tasksArray != null ) {
+      var article = $("article");
+      var firstTask = article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").first();
+      
+      for( i=0; i<tasksArray.length; ++i ) {
+         var taskPair = tasksArray[i];
+         
+         var taskName = taskPair[0];
+         var numberOfPomodoros = taskPair[1];
+         
+         if( i == 0 ) {
+            setTaskNameAndPoms( firstTask, taskName, numberOfPomodoros );
+         }
+         else {
+            var lastTask = article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").last();               
+            var newTask  = lastTask.clone( true, true ); // with data and events, deep.
+            newTask.children("img").remove();
+            setTaskNameAndPoms( newTask, taskName, numberOfPomodoros );
+            newTask.insertAfter(lastTask);
+         }
+      }
+   } // if( tasksArray != null ) {
+}
+
+function loadTasksAndPomodorosArrayFromLocalStorage() {
+   if(typeof(localStorage)=='undefined') { return; }
+   
+   var tasksArray = null;
+
+   try {
+      var dataJSON = localStorage.getItem("tasks");
+
+      if( dataJSON != null && typeof( dataJSON ) != 'undefined' && dataJSON != "" ) {
+         
+         tasksArray = $.secureEvalJSON( dataJSON );
+      }      
+   } catch(e) {
+      // Do nothing if failed to read or convert from JSON - let the result be null.
+   }
+   
+   return tasksArray;
+}
+
+function setTaskNameAndPoms(taskElement, taskName, numberOfPomodoros) {
+   taskElement.find("input").val(taskName);
+   taskElement.find(".pomdone").remove();
+   var taskControls = taskElement.find(".controls");
+   for( p=0; p < numberOfPomodoros; ++p ) {
+      makeDonePom().insertBefore( taskControls );
+   }
+}
 
 function saveTasksAndPomodoros() {
    if(typeof(localStorage)=='undefined') { return; }
    
    var tasks = [];
-   $(".task input").each( function(index) {
-      tasks.push($(this).attr("value"));
+   $(".task input, .inactivetask input, .workingtask input, .resttask input, .restingtask input").each(
+      function(index) {
+         var taskName = $(this).attr("value");
+         var thisTask = $(this).closest(".task, .inactivetask, .workingtask, .resttask, .restingtask");
+         var numberOfDonePomodoros = thisTask.find(".pomdone").size();
+         tasks.push([taskName, numberOfDonePomodoros]);
       });
    
    var dataJSON = $.toJSON( tasks );
