@@ -42,7 +42,8 @@ jQuery(document).ready(function(){
    
    $("input").keyup(function(e){
       if(e.keyCode == 13){
-         var thisTask = $(this).closest(".task");
+         var thisInput = $(this);
+         var thisTask = thisInput.closest(".task");
          var newTask  = thisTask.clone( true, true ); // with data and events, deep.
          var newInput = newTask.find("input").val("");
          newTask.children("img").remove();
@@ -53,8 +54,20 @@ jQuery(document).ready(function(){
       }
       clearInterval( g_saveIntervalId );
       g_saveIntervalId = setInterval("saveTasksAndPomodoros()", 3000);
+      updateTaskWidths();
    });
 });
+
+function updateTaskWidths() {
+   var article = $("article");
+   var maxWidthInLetters = 0;
+   article.find("input").each( function(index) {
+      var w = $(this).attr("value").length;
+      if( w > maxWidthInLetters ) { maxWidthInLetters = w; }
+   } );
+   var resultWidth = Math.max( 25, maxWidthInLetters );
+   article.find("input").css("width", resultWidth + "ex" );
+}
 
 function clearTasksAndPomodoros() {
    var article = $("article");

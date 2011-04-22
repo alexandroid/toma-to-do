@@ -3,6 +3,7 @@ input {
    border-bottom-style:solid;
    border-width:1px;
    border-color:silver;
+   width:25ex;
 }
 .task, .inactivetask, .workingtask, .resttask, .restingtask {
    display: block;
