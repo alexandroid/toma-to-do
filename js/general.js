@@ -39,6 +39,16 @@ jQuery(document).ready(function(){
    $("button.del").click(function(e){
       $(this).closest(".task").find("img").last().remove();
    });
+
+   $("button.planadd").click(function(e){
+      var thisControls = $(this).closest(".controls");
+      var planPom = makePlanPom();
+      planPom.insertBefore( thisControls );
+   });
+
+   $("button.planrem").click(function(e){
+      $(this).closest(".task").children("img").last().remove();
+   });
    
    $("input").keyup(function(e){
       if(e.keyCode == 13){
@@ -166,6 +176,11 @@ function saveTasksAndPomodoros() {
 function makeDonePom() {
    return $('<img class="pom pomdone" src="img/pom50rd.png" />');
 }
+
+function makePlanPom() {
+   return $('<img class="pom pomplan" src="img/pom50pl.png" />');
+}
+
 
 function secondsToTime(seconds) {
    var min = Math.floor( seconds / 60 );
