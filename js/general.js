@@ -44,16 +44,19 @@ jQuery(document).ready(function(){
       var planPom = makePlanPom();
       planPom.insertBefore( thisControls );
       saveTasksAndPomodoros();
+      updateTotalHoursPlanned();
    });
 
    $("button.planrem").click(function(e){
-      $(this).closest(".task").children("img").last().remove();
+      $(this).closest(".task").children(".pomplan").last().remove();
       saveTasksAndPomodoros();
+      updateTotalHoursPlanned();
    });
    
    $("#clearall").click(function(e){
       clearTasksAndPomodoros();
       saveTasksAndPomodoros();
+      updateTotalHoursPlanned();
    });
    
    $("input").focusout(function(e){
@@ -79,6 +82,31 @@ jQuery(document).ready(function(){
       updateTaskWidths();
    });
 });
+
+function updateTotalHoursPlanned() {
+   var pomsLeft = $("article").find(".pomplan").size();
+   var pomsDone = $("article").find(".pomdone").size();
+   var text = '';
+   if( pomsLeft + pomsDone > 0 ) {
+      text = ' (';
+      if( pomsLeft > 0 ) {
+         text += pomsToHours(pomsLeft) + ' to go';
+      }
+      if( pomsDone > 0 ) {
+         if( pomsLeft > 0 ) text += ', ';
+         text += pomsToHours(pomsDone) + ' done';
+      }
+      text += ')';
+   }
+   $("#planHoursSummary").text( text );
+}
+
+function pomsToHours( poms ) {
+   var hours = poms / 2;
+   if( poms > 2 ) return hours + ' hours';
+   if( poms == 2 ) return 'one hour';
+   if( poms == 1 ) return '30 min';
+}
 
 function updateTaskWidths() {
    var article = $("article");
@@ -132,6 +160,7 @@ function loadTasksAndPomodoros() {
       }
    } // if( tasksArray != null )
    updateTaskWidths();
+   updateTotalHoursPlanned();
 }
 
 function loadTasksAndPomodorosArrayFromLocalStorage() {
