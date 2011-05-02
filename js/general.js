@@ -101,19 +101,20 @@ function loadTasksAndPomodoros() {
       var firstTask = article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").first();
       
       for( i=0; i<tasksArray.length; ++i ) {
-         var taskPair = tasksArray[i];
+         var taskData = tasksArray[i];
          
-         var taskName = taskPair[0];
-         var numberOfPomodoros = taskPair[1];
+         var taskName = taskData[0];
+         var numberOfDonePomodoros = taskData[1];
+         var numberOfLeftPomodoros = taskData[2];
          
          if( i == 0 ) {
-            setTaskNameAndPoms( firstTask, taskName, numberOfPomodoros );
+            setTaskNameAndPoms( firstTask, taskName, numberOfDonePomodoros, numberOfLeftPomodoros );
          }
          else {
             var lastTask = article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").last();               
             var newTask  = lastTask.clone( true, true ); // with data and events, deep.
             newTask.children("img").remove();
-            setTaskNameAndPoms( newTask, taskName, numberOfPomodoros );
+            setTaskNameAndPoms( newTask, taskName, numberOfDonePomodoros, numberOfLeftPomodoros );
             newTask.insertAfter(lastTask);
          }
       }
@@ -139,12 +140,15 @@ function loadTasksAndPomodorosArrayFromLocalStorage() {
    return tasksArray;
 }
 
-function setTaskNameAndPoms(taskElement, taskName, numberOfPomodoros) {
+function setTaskNameAndPoms(taskElement, taskName, numberOfDonePomodoros, numberOfLeftPomodoros) {
    taskElement.find("input").val(taskName);
    taskElement.find(".pomdone").remove();
    var taskControls = taskElement.find(".controls");
-   for( p=0; p < numberOfPomodoros; ++p ) {
+   for( p=0; p < numberOfDonePomodoros; ++p ) {
       makeDonePom().insertBefore( taskControls );
+   }
+   for( p=0; p < numberOfLeftPomodoros; ++p ) {
+      makePlanPom().insertBefore( taskControls );
    }
 }
 
@@ -156,8 +160,9 @@ function saveTasksAndPomodoros() {
       function(index) {
          var taskName = $(this).attr("value");
          var thisTask = $(this).closest(".task, .inactivetask, .workingtask, .resttask, .restingtask");
-         var numberOfDonePomodoros = thisTask.find(".pomdone").size();
-         tasks.push([taskName, numberOfDonePomodoros]);
+         var numberOfDonePomodoros = thisTask.children(".pomdone").size();
+         var numberOfLeftPomodoros = thisTask.children(".pomplan").size();
+         tasks.push([taskName, numberOfDonePomodoros, numberOfLeftPomodoros]);
       });
    
    var dataJSON = $.toJSON( tasks );
@@ -227,7 +232,8 @@ function countDownRest() {
       g_isTimerOn = false;
       var thisTask = g_taskTimeElement.closest(".restingtask");
       thisTask.addClass("task").removeClass("restingtask");
-      makeDonePom().insertBefore(g_taskTimeElement.closest(".controls"));
+      makeDonePom().insertAfter(thisTask.children("input"));
+      thisTask.children(".pomplan").last().remove();
       thisTask.parent("article").find(".inactivetask").each( function(index) {
          if ($(this) != thisTask) {
             $(this).addClass("task").removeClass("inactivetask");
