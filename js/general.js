@@ -3,8 +3,8 @@ jQuery(document).ready(function(){
    g_cookieName = "tasksAndPomodoros";
    g_isTimerOn = false;
    g_storageErrorHappened = false;
+   g_saveTimeoutId = null;
    loadTasksAndPomodoros();
-   g_saveIntervalId = setInterval("saveTasksAndPomodoros()", 3000);
 
    $("button.work").click(function(e){
       if( g_isTimerOn ) return;
@@ -33,7 +33,6 @@ jQuery(document).ready(function(){
       g_secondsLeft = getNumberOfSecondsToRest();
       g_isTimerOn = true;
       g_intervalId = setInterval("countDownRest()", 1000);
-      
    });
 
    $("button.del").click(function(e){
@@ -44,26 +43,39 @@ jQuery(document).ready(function(){
       var thisControls = $(this).closest(".controls");
       var planPom = makePlanPom();
       planPom.insertBefore( thisControls );
+      saveTasksAndPomodoros();
    });
 
    $("button.planrem").click(function(e){
       $(this).closest(".task").children("img").last().remove();
+      saveTasksAndPomodoros();
+   });
+   
+   $("#clearall").click(function(e){
+      clearTasksAndPomodoros();
+      saveTasksAndPomodoros();
+   });
+   
+   $("input").focusout(function(e){
+      saveTasksAndPomodoros();
    });
    
    $("input").keyup(function(e){
       if(e.keyCode == 13){
+         if( g_saveTimeoutId ) clearTimeout( g_saveTimeoutId );
          var thisInput = $(this);
          var thisTask = thisInput.closest(".task");
          var newTask  = thisTask.clone( true, true ); // with data and events, deep.
          var newInput = newTask.find("input").val("");
          newTask.children("img").remove();
-         //var pom = makePom();
-         //pom.insertAfter(newInput);
          newTask.insertAfter(thisTask);
          newInput.focus();
+         saveTasksAndPomodoros();
       }
-      clearInterval( g_saveIntervalId );
-      g_saveIntervalId = setInterval("saveTasksAndPomodoros()", 3000);
+      else {
+         if( g_saveTimeoutId ) clearTimeout( g_saveTimeoutId );
+         g_saveTimeoutId = setTimeout("saveTasksAndPomodoros()", getSaveTimeoutTimeoutMs());
+      }
       updateTaskWidths();
    });
 });
@@ -118,7 +130,8 @@ function loadTasksAndPomodoros() {
             newTask.insertAfter(lastTask);
          }
       }
-   } // if( tasksArray != null ) {
+   } // if( tasksArray != null )
+   updateTaskWidths();
 }
 
 function loadTasksAndPomodorosArrayFromLocalStorage() {
@@ -203,6 +216,10 @@ function getNumberOfSecondsToRest() {
    return 5*60;
 }
 
+function getSaveTimeoutTimeoutMs() {
+   return 1000;
+};
+
 function countDownWork() {
    if( --g_secondsLeft > 0 ) {
       g_taskTimeElement.text( secondsToTime( g_secondsLeft ) );
@@ -239,6 +256,7 @@ function countDownRest() {
             $(this).addClass("task").removeClass("inactivetask");
          }
       });
+      saveTasksAndPomodoros();
    }
 }
 
