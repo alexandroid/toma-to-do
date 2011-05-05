@@ -10,10 +10,10 @@ jQuery(document).ready(function(){
       if( g_isTimerOn ) return;
       
       var thisTask = $(this).closest(".task");
-      thisTask.addClass("workingtask").removeClass("task");
-      thisTask.parent("article").find(".task").each( function(index) {
+      thisTask.addClass("workingtask").removeClass("startabletask");
+      thisTask.parent("article").find(".startabletask").each( function(index) {
          if ($(this) != thisTask) {
-            $(this).addClass("inactivetask").removeClass("task");
+            $(this).addClass("inactivetask").removeClass("startabletask");
          }
       });
       
@@ -35,6 +35,7 @@ jQuery(document).ready(function(){
       g_intervalId = setInterval("countDownRest()", 1000);
    });
 
+   // Not used yet.
    $("button.del").click(function(e){
       $(this).closest(".task").find("img").last().remove();
    });
@@ -71,6 +72,11 @@ jQuery(document).ready(function(){
          var newTask  = thisTask.clone( true, true ); // with data and events, deep.
          var newInput = newTask.find("input").val("");
          newTask.children("img").remove();
+         if(!newTask.hasClass("startabletask")) {
+            // It means we are in active task mode, and new task should be forced to be inactive
+            // regardless of whether we copied an inactive or 'active' task:
+            newTask.removeClass("workingtask resttask restingtask").addClass("inactivetask");
+         }
          newTask.insertAfter(thisTask);
          newInput.focus();
          saveTasksAndPomodoros();
@@ -121,24 +127,27 @@ function updateTaskWidths() {
 
 function clearTasksAndPomodoros() {
    var article = $("article");
-   var firstTask = article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").first();
-   article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").each( function(index) {
+   article.find(".task").each( function(index) {
       if (index != 0) {
          $(this).children("img").remove();
          $(this).remove();
       } else { // index == 0;
          $(this).find("input").val("");
          $(this).children("img").remove();
+         $(this).removeClass("workingtask resttask restingtask inactivetask").addClass("startabletask");
       }
    });
 }
 
+// This function is not designed to support "any time load" i.e. when there are other
+// tasks present than the initial empty single one defined in HTML.
+// But it could be improved if we ever need it (although, probably "clearall" + load should do the job too).
 function loadTasksAndPomodoros() {
    
    var tasksArray = loadTasksAndPomodorosArrayFromLocalStorage();
    if( tasksArray != null ) {
       var article = $("article");
-      var firstTask = article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").first();
+      var firstTask = article.find(".task").first();
       
       for( i=0; i<tasksArray.length; ++i ) {
          var taskData = tasksArray[i];
@@ -151,7 +160,7 @@ function loadTasksAndPomodoros() {
             setTaskNameAndPoms( firstTask, taskName, numberOfDonePomodoros, numberOfLeftPomodoros );
          }
          else {
-            var lastTask = article.find(".task, .inactivetask, .workingtask, .resttask, .restingtask").last();               
+            var lastTask = article.find(".task").last();
             var newTask  = lastTask.clone( true, true ); // with data and events, deep.
             newTask.children("img").remove();
             setTaskNameAndPoms( newTask, taskName, numberOfDonePomodoros, numberOfLeftPomodoros );
@@ -198,10 +207,10 @@ function saveTasksAndPomodoros() {
    if(typeof(localStorage)=='undefined') { return; }
    
    var tasks = [];
-   $(".task input, .inactivetask input, .workingtask input, .resttask input, .restingtask input").each(
+   $(".task input").each(
       function(index) {
          var taskName = $(this).attr("value");
-         var thisTask = $(this).closest(".task, .inactivetask, .workingtask, .resttask, .restingtask");
+         var thisTask = $(this).closest(".task");
          var numberOfDonePomodoros = thisTask.children(".pomdone").size();
          var numberOfLeftPomodoros = thisTask.children(".pomplan").size();
          tasks.push([taskName, numberOfDonePomodoros, numberOfLeftPomodoros]);
@@ -237,18 +246,6 @@ function secondsToTime(seconds) {
    return minStr + ':' + secStr;
 }
 
-function getNumberOfSecondsToWork() {
-   return 25*60;
-}
-
-function getNumberOfSecondsToRest() {
-   return 5*60;
-}
-
-function getSaveTimeoutTimeoutMs() {
-   return 1000;
-};
-
 function countDownWork() {
    if( --g_secondsLeft > 0 ) {
       g_taskTimeElement.text( secondsToTime( g_secondsLeft ) );
@@ -277,12 +274,12 @@ function countDownRest() {
       clearInterval( g_intervalId );
       g_isTimerOn = false;
       var thisTask = g_taskTimeElement.closest(".restingtask");
-      thisTask.addClass("task").removeClass("restingtask");
+      thisTask.addClass("startabletask").removeClass("restingtask");
       makeDonePom().insertAfter(thisTask.children("input"));
       thisTask.children(".pomplan").last().remove();
       thisTask.parent("article").find(".inactivetask").each( function(index) {
          if ($(this) != thisTask) {
-            $(this).addClass("task").removeClass("inactivetask");
+            $(this).addClass("startabletask").removeClass("inactivetask");
          }
       });
       saveTasksAndPomodoros();
@@ -294,3 +291,15 @@ function toTwoDigitString( v ) {
    if( vStr.length < 2 ) return '0' + vStr;
    return vStr;
 }
+
+function getNumberOfSecondsToWork() {
+   return 25*60;
+}
+
+function getNumberOfSecondsToRest() {
+   return 5*60;
+}
+
+function getSaveTimeoutTimeoutMs() {
+   return 1000;
+};

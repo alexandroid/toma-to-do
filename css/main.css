@@ -2,16 +2,19 @@
    font-family: "Helvetica Neue", Arial, sans-serif;
 }
 /**
- * working task - task being worked on. All others at this time = inactivetask.
- * rest task - task which was just worked on and not needs a rest period. All others = inactivetask still.
- * resting task - task which is being rested. All others at this time = inactivetask.
- * task - general tasks where no work or rest is in progress.
+ * task - any task, common class for all task entries, does not change.
+ * 
+ * task state classes:
+ *   working task - task being worked on. All others at this time = inactivetask.
+ *   rest task - task which was just worked on and not needs a rest period. All others = inactivetask still.
+ *   resting task - task which is being rested. All others at this time = inactivetask.
+ *   startabletask - general tasks where no work or rest is in progress.
  */
-.task, .inactivetask, .workingtask, .resttask, .restingtask {
+.task {
    display: block;
    margin-top:1px; /*  for input lines */
 }
-.task *,.inactivetask *,.workingtask *,.resttask *,.restingtask *, .controls * {
+.task *, .controls * {
    font-size: xx-large;
    height: 3ex;
 }
@@ -35,10 +38,10 @@ input {
 .controls * {
    display:none;
 }
-.task:hover .controls * {
+.startabletask:hover .controls * {
    display:inline;
 }
-.task:hover .controls .rest, .task:hover .controls .pomrest {
+.startabletask:hover .controls .rest, .startabletask:hover .controls .pomrest {
    display:none;
 }
 .workingtask .controls *, .resttask .controls *, .restingtask .controls * {
