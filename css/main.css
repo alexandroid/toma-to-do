@@ -34,11 +34,14 @@ input {
 .controls {
    display:inline;
 }
+.delete {
+   margin-left:1.5em;
+}
 
 .controls * {
    display:none;
 }
-.startabletask:hover .controls * {
+.startabletask:hover .controls *, .inactivetask:hover .controls .delete {
    display:inline;
 }
 .startabletask:hover .controls .rest, .startabletask:hover .controls .pomrest {
@@ -49,6 +52,7 @@ input {
 }
 .workingtask .controls button,
 .restingtask .controls button,
+.resttask .controls .delete,
 .workingtask .controls .pomrest,
 .restingtask .controls .pomwork,
 .resttask .controls .work,

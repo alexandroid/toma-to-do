@@ -35,9 +35,20 @@ jQuery(document).ready(function(){
       g_intervalId = setInterval("countDownRest()", 1000);
    });
 
-   // Not used yet.
-   $("button.del").click(function(e){
-      $(this).closest(".task").find("img").last().remove();
+   $("button.delete").click(function(e){
+      var thisTask = $(this).closest(".task");
+      var numTasks = $("article").find(".task").size();
+
+      if( numTasks > 1 ) {
+         thisTask.remove();
+      }
+      else {
+         thisTask.find("input").val("");
+         thisTask.children("img").remove();
+         thisTask.removeClass("workingtask resttask restingtask inactivetask").addClass("startabletask");
+      }
+      saveTasksAndPomodoros();
+      updateTotalHoursPlanned();
    });
 
    $("button.planadd").click(function(e){
