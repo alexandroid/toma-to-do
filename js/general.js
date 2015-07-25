@@ -11,7 +11,7 @@ jQuery(document).ready(function(){
       
       var thisTask = $(this).closest(".task");
       thisTask.addClass("workingtask").removeClass("startabletask");
-      thisTask.parent("article").find(".startabletask").each( function(index) {
+      thisTask.parent("section").find(".startabletask").each( function(index) {
          if ($(this) != thisTask) {
             $(this).addClass("inactivetask").removeClass("startabletask");
          }
@@ -34,10 +34,21 @@ jQuery(document).ready(function(){
       g_isTimerOn = true;
       g_intervalId = setInterval("countDownRest()", 1000);
    });
+   
+   $("button.done").click(function(e){
+      var thisTask = $(this).closest(".task");
+      thisTask.detach();
+      thisTask.removeClass("workingtask resttask restingtask inactivetask startabletask").addClass("donetask");
+      thisTask.find(".controls").remove();
+      thisTask.append(makeDoneDate(new Date()));
+      thisTask.append(makeDoneTaskControls());
+      thisTask.insertAfter($(".completedGoals h1"));
+   });
 
    $("button.delete").click(function(e){
+      var thisSection = $(this).closest("section");
       var thisTask = $(this).closest(".task");
-      var numTasks = $("article").find(".task").size();
+      var numTasks = thisSection.find(".task").size();
 
       if( numTasks > 1 ) {
          thisTask.remove();
@@ -65,8 +76,9 @@ jQuery(document).ready(function(){
       updateTotalHoursPlanned();
    });
    
-   $("#clearall").click(function(e){
-      clearTasksAndPomodoros();
+   $("button.clearall").click(function(e){
+      var section = $(this).closest("section");
+      clearTasksAndPomodoros(section);
       saveTasksAndPomodoros();
       updateTotalHoursPlanned();
    });
@@ -76,9 +88,11 @@ jQuery(document).ready(function(){
    });
    
    $("input").keyup(function(e){
+      var thisInput = $(this);
+      var thisSection = thisInput.closest("section");
+      
       if(e.keyCode == 13){
          if( g_saveTimeoutId ) clearTimeout( g_saveTimeoutId );
-         var thisInput = $(this);
          var thisTask = thisInput.closest(".task");
          var newTask  = thisTask.clone( true, true ); // with data and events, deep.
          var newInput = newTask.find("input").val("");
@@ -96,13 +110,14 @@ jQuery(document).ready(function(){
          if( g_saveTimeoutId ) clearTimeout( g_saveTimeoutId );
          g_saveTimeoutId = setTimeout("saveTasksAndPomodoros()", getSaveTimeoutTimeoutMs());
       }
-      updateTaskWidths();
+      
+      updateTaskWidths(thisSection);
    });
 });
 
 function updateTotalHoursPlanned() {
-   var pomsLeft = $("article").find(".pomplan").size();
-   var pomsDone = $("article").find(".pomdone").size();
+   var pomsLeft = $("section").find(".pomplan").size();
+   var pomsDone = $("section").find(".pomdone").size();
    var text = '';
    if( pomsLeft + pomsDone > 0 ) {
       text = ' (';
@@ -125,20 +140,22 @@ function pomsToHours( poms ) {
    if( poms == 1 ) return '30 min';
 }
 
-function updateTaskWidths() {
-   var article = $("article");
+function updateTaskWidthsInAllSections() {
+   updateTaskWidths($("section effortPlan"));
+   updateTaskWidths($("section completedGoals"));
+}
+function updateTaskWidths(section) {
    var maxWidthInLetters = 0;
-   article.find("input").each( function(index) {
+   section.find("input").each( function(index) {
       var w = $(this).attr("value").length;
       if( w > maxWidthInLetters ) { maxWidthInLetters = w; }
    } );
    var resultWidth = Math.max( 25, maxWidthInLetters );
-   article.find("input").css("width", resultWidth + "ex" );
+   section.find("input").css("width", resultWidth + "ex" );
 }
 
-function clearTasksAndPomodoros() {
-   var article = $("article");
-   article.find(".task").each( function(index) {
+function clearTasksAndPomodoros(section) {
+   section.find(".task").each( function(index) {
       if (index != 0) {
          $(this).children("img").remove();
          $(this).remove();
@@ -157,8 +174,8 @@ function loadTasksAndPomodoros() {
    
    var tasksArray = loadTasksAndPomodorosArrayFromLocalStorage();
    if( tasksArray != null ) {
-      var article = $("article");
-      var firstTask = article.find(".task").first();
+      var section = $("section").first();
+      var firstTask = section.find(".task").first();
       
       for( i=0; i<tasksArray.length; ++i ) {
          var taskData = tasksArray[i];
@@ -171,7 +188,7 @@ function loadTasksAndPomodoros() {
             setTaskNameAndPoms( firstTask, taskName, numberOfDonePomodoros, numberOfLeftPomodoros );
          }
          else {
-            var lastTask = article.find(".task").last();
+            var lastTask = section.find(".task").last();
             var newTask  = lastTask.clone( true, true ); // with data and events, deep.
             newTask.children("img").remove();
             setTaskNameAndPoms( newTask, taskName, numberOfDonePomodoros, numberOfLeftPomodoros );
@@ -179,7 +196,7 @@ function loadTasksAndPomodoros() {
          }
       }
    } // if( tasksArray != null )
-   updateTaskWidths();
+   updateTaskWidthsInAllSections();
    updateTotalHoursPlanned();
 }
 
@@ -215,22 +232,32 @@ function setTaskNameAndPoms(taskElement, taskName, numberOfDonePomodoros, number
 }
 
 function saveTasksAndPomodoros() {
-   if(typeof(localStorage)=='undefined') { return; }
+   if( typeof(localStorage)=='undefined' ) { return; }
    
-   var tasks = [];
-   $(".task input").each(
+   var tasksTodo = [];
+   $("section .effortplan").find(".task input").each(
       function(index) {
          var taskName = $(this).attr("value");
          var thisTask = $(this).closest(".task");
          var numberOfDonePomodoros = thisTask.children(".pomdone").size();
          var numberOfLeftPomodoros = thisTask.children(".pomplan").size();
-         tasks.push([taskName, numberOfDonePomodoros, numberOfLeftPomodoros]);
+         tasksTodo.push([taskName, numberOfDonePomodoros, numberOfLeftPomodoros]);
       });
+   var tasksTodoJSON = $.toJSON( tasksTodo );
    
-   var dataJSON = $.toJSON( tasks );
-   
+   var tasksDone = [];
+/*   $("section .effortplan").find(".task input").each(
+      function(index) {
+         var taskName = $(this).attr("value");
+         var thisTask = $(this).closest(".task");
+         var numberOfDonePomodoros = thisTask.children(".pomdone").size();
+         var numberOfLeftPomodoros = thisTask.children(".pomplan").size();
+         tasksTodo.push([taskName, numberOfDonePomodoros, numberOfLeftPomodoros]);
+      });
+   var tasksTodoJSON = $.toJSON( tasksTodo );
+   */
    try {
-      localStorage.setItem("tasks", dataJSON);
+      localStorage.setItem( "tasks", tasksTodoJSON );
       g_storageErrorHappened = false;
    } catch(e) {
       if (e==QUOTA_EXCEEDED_ERR && !g_storageErrorHappened ) {
@@ -248,6 +275,18 @@ function makePlanPom() {
    return $('<img class="pom pomplan" src="img/pom50pl.png" />');
 }
 
+function makeDoneTaskControls() {
+   return $('<div class="controls">' + 
+            '<button type="button" class="workmore">work more</button>' +
+            '<button type="button" class="delete">&#x2717;</button>' +
+            '</div>');
+}
+
+function makeDoneDate(date) {
+   return $('<span class="donedate">' +
+            (date.getMonth()+1) + '/' + date.getDate() + '/' + date.getFullYear() +
+            '</span>');
+}
 
 function secondsToTime(seconds) {
    var min = Math.floor( seconds / 60 );
@@ -288,7 +327,7 @@ function countDownRest() {
       thisTask.addClass("startabletask").removeClass("restingtask");
       makeDonePom().insertAfter(thisTask.children("input"));
       thisTask.children(".pomplan").last().remove();
-      thisTask.parent("article").find(".inactivetask").each( function(index) {
+      thisTask.parent("section").find(".inactivetask").each( function(index) {
          if ($(this) != thisTask) {
             $(this).addClass("startabletask").removeClass("inactivetask");
          }

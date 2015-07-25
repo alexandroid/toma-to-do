@@ -9,6 +9,7 @@
  *   rest task - task which was just worked on and not needs a rest period. All others = inactivetask still.
  *   resting task - task which is being rested. All others at this time = inactivetask.
  *   startabletask - general tasks where no work or rest is in progress.
+ * donetask - task which was marked as completed goal.
  */
 .task {
    display: block;
@@ -41,7 +42,7 @@ input {
 .controls * {
    display:none;
 }
-.startabletask:hover .controls *, .inactivetask:hover .controls .delete {
+.startabletask:hover .controls *, .donetask:hover *, .inactivetask:hover .controls .delete {
    display:inline;
 }
 .startabletask:hover .controls .rest, .startabletask:hover .controls .pomrest {
@@ -58,4 +59,14 @@ input {
 .resttask .controls .work,
 .resttask .controls .pomwork {
    display:none;
+}
+.donedate {
+   color: silver;
+   margin-right: 0.5em;
+}
+.donedate:before {
+   content: "\2713  ";
+}
+.delete {
+   color: #800000;
 }

@@ -15,20 +15,32 @@
 </head>
 
 <body>
-<h1>Effort plan<span id="planHoursSummary"></span>:</h1>
 <article>
-<div class="task startabletask">
-   <input type="text" />
-   <!--img class="pom" src="css/pom50rd.png" /-->
-   <div class="controls">
-      <button type="button" class="planadd">+<img class="pom" src="img/pom50pl.png" style="height:2.2ex" /></button>
-      <button type="button" class="planrem">&#8722;<img class="pom" src="img/pom50pl.png" style="height:2.2ex" /></button>
-      <button type="button" class="delete">x</button>
-      <!--button type="button" class="alldone">all done!</button-->
-   </div>
-</div>
+   <section class="effortPlan">
+      <h1>Effort plan<span id="planHoursSummary"></span>:</h1>
+      <div class="task startabletask">
+         <input type="text" />
+         <div class="controls">
+            <button type="button" class="planadd">+<img class="pom" src="img/pom50pl.png" style="height:2.2ex" /></button>
+            <button type="button" class="planrem">&#8722;<img class="pom" src="img/pom50pl.png" style="height:2.2ex" /></button>
+            <button type="button" class="delete">x</button>
+            <button type="button" class="done">&#x2713;</button>
+         </div>
+      </div>
+      <p><button type="button" class="clearall">Clear all</button></p>
+   </section>
+   <p><a href="index.html">Go! &gt;&gt;</a></p>
+   <section class="completedGoals">
+      <h1>Completed Goals:</h1>
+      <div class="task startabletask">
+         <input type="text" />
+         <div class="controls">
+            <button type="button" class="delete">x</button>
+            <button type="button" class="workmore">work more</button>
+         </div>
+      </div>
+      <p><button type="button" class="clearall">Clear all</button></p>
+   </section>
 </article>
-<p><button type="button" id="clearall">Clear all</button></p>
-<p><a href="index.html">Go! &gt;&gt;</a></p>
 <!--h1>Completed Goals:</h1-->
 </body>

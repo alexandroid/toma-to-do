@@ -40,23 +40,34 @@ soundManager.onready(function() {
 </head>
 
 <body>
-<h1>Today's Goals<span id="planHoursSummary"></span>:</h1>
 <article>
-<div class="task startabletask">
-   <input type="text" />
-   <!--img class="pom" src="css/pom50rd.png" /-->
-   <div class="controls">
-      <img class="pom pomrest" src="img/pom50gl.png" />
-      <img class="pom pomwork" src="img/pom50gr.png" />
-      <span class="timer">25:00</span>
-      <button type="button" class="work">do it!</button>
-      <button type="button" class="rest">rest!</button>
-      <button type="button" class="delete">x</button>
-      <!--button type="button" class="alldone">all done!</button-->
-   </div>
-</div>
+   <section class="effortPlan">
+      <h1>Today's Goals<span id="planHoursSummary"></span>:</h1>
+      <div class="task startabletask">
+         <input type="text" />
+         <div class="controls">
+            <img class="pom pomrest" src="img/pom50gl.png" />
+            <img class="pom pomwork" src="img/pom50gr.png" />
+            <span class="timer">25:00</span>
+            <button type="button" class="work">do it!</button>
+            <button type="button" class="rest">rest!</button>
+            <button type="button" class="done">&#x2713;</button>
+            <button type="button" class="delete">&#x2717;</button>
+         </div>
+      </div>
+      <p><button type="button" class="clearall">Clear all</button></p>
+   </section>
+   <p><a href="plan.html">&lt;&lt; Back to planning</a></p>
+   <section class="completedGoals">
+      <h1>Completed Goals:</h1>
+      <div class="task donetask">
+         <input type="text" /><span class="donedate">5/7/2011</span>
+         <div class="controls">
+            <button type="button" class="workmore">work more</button>
+            <button type="button" class="delete">&#x2717;</button>
+         </div>
+      </div>
+      <p><button type="button" class="clearall">Clear all</button></p>
+   </section>
 </article>
-<p><button type="button" onclick="clearTasksAndPomodoros()">Clear all</button></p>
-<p><a href="plan.html">&lt;&lt; Back to planning</a></p>
-<!--h1>Completed Goals:</h1-->
 </body>
