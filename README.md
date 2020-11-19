@@ -14,9 +14,12 @@ More about the Pomodoro technique:
 
 Pomodoro image is based on:
    http://www.sxc.hu/photo/1292607
+
 Sound is based on:
    http://www.freesound.org/samplesViewSingle.php?id=14263
+
 JQuery library:
    http://jquery.com/
+
 SoundManager2 library:
    http://www.schillmania.com/projects/soundmanager2/
