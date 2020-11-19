@@ -1,4 +1,4 @@
-This is a simple pomodoro timer which can be used as a simple standalone Javascript application.
+This is a simple pomodoro timer ~~which can be used as a simple standalone Javascript application~~.
 
 Live working version (uses local storage so it does not need a server):
    http://alexandroid.github.com/toma-to-do/
