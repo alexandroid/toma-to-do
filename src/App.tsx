@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import logo from './logo.svg';
-import './App.css';
+//import './App.css';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Button from '@material-ui/core/Button';
+import Container from '@material-ui/core/Container';
+import TextField from '@material-ui/core/TextField';
+import Box from '@material-ui/core/Box';
 
 type Task = {
   objective: string;
@@ -25,12 +30,16 @@ function App() {
   if (state === 'planning') {
     return (
       <>
-        <h1>Effort plan</h1>
-        <ul>
-          {tasks.map(task => (
-            <li>{task.objective}</li>
-          ))}
-        </ul>
+        <Container>
+          <h1>Effort plan</h1>
+          <Box>
+            <TextField id="one" value={tasks[0].objective} fullWidth={true} onChange={(e) => setTasks([{...tasks[0], objective: e.target.value}])}/>
+          </Box>
+          <TextField id="two" value={tasks[0].objective} />
+          {/* <Button variant="contained" color="primary">
+            Hello World
+          </Button> */}
+        </Container>
       </>
     );
   }
