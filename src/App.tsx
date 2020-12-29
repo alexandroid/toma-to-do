@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import logo from './logo.svg';
+//import logo from './logo.svg';
 //import './App.css';
-import CssBaseline from '@material-ui/core/CssBaseline';
+//import CssBaseline from '@material-ui/core/CssBaseline';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import { PlannedTomato } from './tomato-icons';
 import produce from 'immer';
+import { Route, Switch, Link as RouteLink } from 'react-router-dom';
 
 type Task = {
   objective: string;
@@ -16,7 +17,7 @@ type Task = {
   numRemaining: number;
 };
 
-type State = 'planning' | 'executing';
+type State = 'planning' | 'working';
 
 const BLANK_TASK: Task = {
   objective: 'Test task',
@@ -32,24 +33,32 @@ function App() {
 
   if (state === 'planning') {
     return (
-      <>
-        <Container>
-          <h1>Effort plan</h1>
-          <TaskPlannerController
-            tasks={tasks}
-            setTasks={setTasks}
-            taskIndexToFocusNext={taskIndexToFocusNext}
-            setTaskIndexToFocusNext={setTaskIndexToFocusNext}
-          />
-          {/* <Button variant="contained" color="primary">
-            Hello World
-          </Button> */}
-        </Container>
-      </>
+      <Switch>
+        <Route path="/" exact={true}>
+          <Container>
+            <h1>Effort plan</h1>
+            <TaskPlannerController
+              tasks={tasks}
+              setTasks={setTasks}
+              taskIndexToFocusNext={taskIndexToFocusNext}
+              setTaskIndexToFocusNext={setTaskIndexToFocusNext}
+            />
+            <Button variant="contained" color="primary" component={RouteLink} to={"/working"}>
+              Start working
+            </Button>
+          </Container>
+        </Route>
+        <Route path="/working">
+          <Container>
+            <h1>Working on tasks</h1>
+
+          </Container>
+        </Route>
+      </Switch>
     );
   }
 
-  // state === 'executing' at this point
+  // state === 'working' at this point
   return (
     <>
       <h1>Today's goals</h1>
