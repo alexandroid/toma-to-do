@@ -22,3 +22,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 node_modules
+
+# Looks like it's set by react-scripts.
+# TODO: Change it to point to something like /build/.eslintcache?
+.eslintcache
