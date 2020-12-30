@@ -11,3 +11,6 @@ export const BLANK_TASK: Task = {
   inProgressUntilTime: undefined,
   numRemaining: 1,
 };
+
+export const DEFAULT_WORK_DURATION_MINS: number = 25;
+export const DEFAULT_REST_DURATION_MINS: number = 5;
