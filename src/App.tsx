@@ -9,9 +9,25 @@ import produce from 'immer';
 import { Route, Switch, Link as RouteLink } from 'react-router-dom';
 import TaskPlannerController from './task-planner';
 import { BLANK_TASK, DEFAULT_REST_DURATION_MINS, DEFAULT_WORK_DURATION_MINS } from './data-model';
-import { TextField } from '@material-ui/core';
+import { PropTypes, TextField } from '@material-ui/core';
 
 type State = 'planning' | 'working';
+
+function SettingsButton() {
+  return (
+    <Button variant="contained" color="default" startIcon={<SettingsIcon />} component={RouteLink} to={"/settings"}>
+      Settings
+    </Button>
+  );
+}
+
+function PlanTasksButton({ color }: { color: PropTypes.Color; }) {
+  return (
+    <Button variant="contained" color={color} component={RouteLink} to={"/"}>
+      Plan tasks
+    </Button>
+  );
+}
 
 function App() {
   const [state, setState] = useState('planning' as State);
@@ -32,14 +48,14 @@ function App() {
               value={tomatoWorkDurationMinutes}
               onChange={(e) => setTomatoWorkDurationMinutes(parseInt(e.target.value))}
               label="Work duration, minutes"
-            /><br/>&nbsp;<br/>
+            /><br />&nbsp;<br />
             <TextField
               variant="filled"
               type="number"
               value={tomatoRestDurationMinutes}
               onChange={(e) => setTomatoRestDurationMinutes(parseInt(e.target.value))}
               label="Rest duration, minutes"
-            /><br/>&nbsp;<br/>
+            /><br />&nbsp;<br />
             <Button
               variant="contained"
               color="secondary"
@@ -50,9 +66,7 @@ function App() {
               }}>
               Reset to 25/5
             </Button>&nbsp;
-            <Button variant="contained" color="primary" component={RouteLink} to={"/"}>
-              Plan tasks
-            </Button>
+            <PlanTasksButton color="primary" />
           </Container>
         </Route>
         <Route path="/" exact={true}>
@@ -63,10 +77,8 @@ function App() {
               setTasks={setTasks}
               taskIndexToFocusNext={taskIndexToFocusNext}
               setTaskIndexToFocusNext={setTaskIndexToFocusNext}
-            /><br/>
-            <Button variant="contained" color="default" startIcon={<SettingsIcon />} component={RouteLink} to={"/settings"}>
-              Settings
-            </Button>&nbsp;
+            /><br />
+            <SettingsButton />&nbsp;
             <Button variant="contained" color="primary" component={RouteLink} to={"/working"}>
               Start working
             </Button>
@@ -75,7 +87,8 @@ function App() {
         <Route path="/working">
           <Container>
             <h1>Working on tasks</h1>
-
+            <SettingsButton />&nbsp;
+            <PlanTasksButton color="default" />
           </Container>
         </Route>
       </Switch>
