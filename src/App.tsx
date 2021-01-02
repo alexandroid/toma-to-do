@@ -10,7 +10,6 @@ import { Route, Switch, Link as RouteLink } from 'react-router-dom';
 import TaskPlannerController from './task-planner';
 import { BLANK_TASK, DEFAULT_REST_DURATION_MINS, DEFAULT_WORK_DURATION_MINS, TaskFocusIndex } from './data-model';
 import { PropTypes, TextField } from '@material-ui/core';
-import TaskWokerController from './task-worker';
 
 // type State = 'planning' | 'working';
 
@@ -94,7 +93,7 @@ function App() {
       <Route path="/working">
         <Container>
           <h1>Working on tasks</h1>
-          <TaskWokerController
+          <TaskPlannerController
             tasks={tasks}
             setTasks={setTasks}
             taskIndexToFocusNext={taskIndexToFocusNext}
