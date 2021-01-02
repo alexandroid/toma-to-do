@@ -5,6 +5,11 @@ export type Task = {
   numRemaining: number;
 };
 
+/**
+ * Null means none of the tasks are focused
+ */
+export type TaskFocusIndex = number | null;
+
 export const BLANK_TASK: Task = {
   objective: 'Test task',
   numDone: 0,

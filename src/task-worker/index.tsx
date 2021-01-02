@@ -4,13 +4,13 @@ import Box from '@material-ui/core/Box';
 import produce from 'immer';
 
 import { PlannedTomato } from '../tomato-icons';
-import { BLANK_TASK, Task } from '../data-model';
+import { BLANK_TASK, Task, TaskFocusIndex } from '../data-model';
 
 export type TaskWorkerControllerProps = {
   setTasks: (tasks: Task[]) => void;
-  setTaskIndexToFocusNext: (taskIndexToFocusNext: number) => void;
+  setTaskIndexToFocusNext: (taskIndexToFocusNext: TaskFocusIndex) => void;
   tasks: Task[];
-  taskIndexToFocusNext: number;
+  taskIndexToFocusNext: TaskFocusIndex;
 }
 
 export default function TaskWokerController({
@@ -48,7 +48,7 @@ export default function TaskWokerController({
                 draft[taskIndex].numRemaining++;
               })
             )
-          } else if (taskIndexToFocusNext > 0) {
+          } else if (taskIndexToFocusNext !== null && taskIndexToFocusNext > 0) {
             setTaskIndexToFocusNext(taskIndexToFocusNext - 1);
           }
           event.preventDefault();
@@ -61,7 +61,7 @@ export default function TaskWokerController({
                 })
               )
             }
-          } else if (tasks.length > 0 && taskIndexToFocusNext < tasks.length - 1) {
+          } else if (tasks.length > 0 && taskIndexToFocusNext !== null && taskIndexToFocusNext < tasks.length - 1) {
             setTaskIndexToFocusNext(taskIndexToFocusNext + 1);
           }
           event.preventDefault();
@@ -84,7 +84,7 @@ export default function TaskWokerController({
 
 type TaskWorkerViewProps = {
   tasks: Task[];
-  taskIndexToFocus: number;
+  taskIndexToFocus: TaskFocusIndex;
   onChange: (event: any, taskIndex: number) => void;
   onKeyDown: (event: any, taskIndex: number) => void;
 };

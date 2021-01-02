@@ -8,7 +8,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import produce from 'immer';
 import { Route, Switch, Link as RouteLink } from 'react-router-dom';
 import TaskPlannerController from './task-planner';
-import { BLANK_TASK, DEFAULT_REST_DURATION_MINS, DEFAULT_WORK_DURATION_MINS } from './data-model';
+import { BLANK_TASK, DEFAULT_REST_DURATION_MINS, DEFAULT_WORK_DURATION_MINS, TaskFocusIndex } from './data-model';
 import { PropTypes, TextField } from '@material-ui/core';
 import TaskWokerController from './task-worker';
 
@@ -33,7 +33,7 @@ function PlanTasksButton({ color }: { color: PropTypes.Color; }) {
 function App() {
   // const [state, setState] = useState('planning' as State);
   const [tasks, setTasks] = useState([produce(BLANK_TASK, draft => draft)]);
-  const [taskIndexToFocusNext, setTaskIndexToFocusNext] = useState(0);
+  const [taskIndexToFocusNext, setTaskIndexToFocusNext] = useState<TaskFocusIndex>(0);
   const [tomatoWorkDurationMinutes, setTomatoWorkDurationMinutes] = useState(25);
   const [tomatoRestDurationMinutes, setTomatoRestDurationMinutes] = useState(5);
 

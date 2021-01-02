@@ -1,16 +1,19 @@
 import React from 'react';
 import TextField from '@material-ui/core/TextField';
-import Box from '@material-ui/core/Box';
+//import Box from '@material-ui/core/Box';
 import produce from 'immer';
 
 import { PlannedTomato } from '../tomato-icons';
-import { BLANK_TASK, Task } from '../data-model';
+import { BLANK_TASK, Task, TaskFocusIndex } from '../data-model';
+import { List, ListItem, ListItemIcon } from '@material-ui/core';
+import { Container as DndContainer, Draggable, DropResult } from 'react-smooth-dnd';
+import DragHandleIcon from '@material-ui/icons/DragHandle';
 
 export type TaskPlannerControllerProps = {
   setTasks: (tasks: Task[]) => void;
-  setTaskIndexToFocusNext: (taskIndexToFocusNext: number) => void;
+  setTaskIndexToFocusNext: (taskIndexToFocusNext: TaskFocusIndex) => void;
   tasks: Task[];
-  taskIndexToFocusNext: number;
+  taskIndexToFocusNext: TaskFocusIndex;
 }
 
 export default function TaskPlannerController({
@@ -48,7 +51,7 @@ export default function TaskPlannerController({
                 draft[taskIndex].numRemaining++;
               })
             )
-          } else if (taskIndexToFocusNext > 0) {
+          } else if (taskIndexToFocusNext !== null && taskIndexToFocusNext > 0) {
             setTaskIndexToFocusNext(taskIndexToFocusNext - 1);
           }
           event.preventDefault();
@@ -61,7 +64,7 @@ export default function TaskPlannerController({
                 })
               )
             }
-          } else if (tasks.length > 0 && taskIndexToFocusNext < tasks.length - 1) {
+          } else if (tasks.length > 0 && taskIndexToFocusNext !== null && taskIndexToFocusNext < tasks.length - 1) {
             setTaskIndexToFocusNext(taskIndexToFocusNext + 1);
           }
           event.preventDefault();
@@ -79,37 +82,89 @@ export default function TaskPlannerController({
           event.preventDefault();
         }
       }}
+      onFocus={(_, taskIndex) => setTaskIndexToFocusNext(taskIndex) }
+      onBlur={(_, taskIndex) => {
+        if (taskIndexToFocusNext === taskIndex) {
+          //setTaskIndexToFocusNext(null);
+        }
+      }}
+      onDrop={({ removedIndex, addedIndex }) => {
+        if (removedIndex !== null && addedIndex !== null) {
+          setTasks(
+            produce(tasks, draft => {
+                const task = tasks[removedIndex];
+                draft.splice(removedIndex, 1);
+                draft.splice(addedIndex, 0, task);
+            })
+          );
+          setTaskIndexToFocusNext(addedIndex);
+          // Initial logic version: Preserve the focus on the task regardless of which task was moved:
+          // if (taskIndexToFocusNext === removedIndex) {
+          //   // special case - focused task was dragged and dropped:
+          //   setTaskIndexToFocusNext(addedIndex);
+          // } else if(taskIndexToFocusNext !== null) {
+          //   let focusedTaskIndex = taskIndexToFocusNext;
+          //   if (removedIndex < taskIndexToFocusNext) { focusedTaskIndex -= 1; }
+          //   if (addedIndex <= focusedTaskIndex) { focusedTaskIndex +=1; }
+          //   if (taskIndexToFocusNext !== focusedTaskIndex) {
+          //     setTaskIndexToFocusNext(focusedTaskIndex);
+          //   }
+          // }
+        }
+      }}
     />);
 }
 
 type TaskPlannerViewProps = {
   tasks: Task[];
-  taskIndexToFocus: number;
+  taskIndexToFocus: TaskFocusIndex;
   onChange: (event: any, taskIndex: number) => void;
   onKeyDown: (event: any, taskIndex: number) => void;
+  onFocus: (event: any, taskIndex: number) => void;
+  onBlur: (event: any, taskIndex: number) => void;
+  onDrop: (_: DropResult) => void;
 };
 
-function TaskPlannerView({ tasks, taskIndexToFocus, onChange, onKeyDown }: TaskPlannerViewProps) {
+function TaskPlannerView({
+  tasks,
+  taskIndexToFocus,
+  onChange,
+  onKeyDown,
+  onFocus,
+  onBlur,
+  onDrop
+}: TaskPlannerViewProps) {
   return (
-    <>
-      {tasks.map((task, taskIndex) => {
-        return (
-          <Box key={`task-${taskIndex}`}>
-            <TextField id={`task-${taskIndex}`} value={task.objective} /*fullWidth={true}*/
-              // https://stackoverflow.com/a/56066985/49678:
-              inputRef={input => input && taskIndex === taskIndexToFocus && input.focus()}
-              onChange={(e) => onChange(e, taskIndex)}
-              onKeyDown={(e) => onKeyDown(e, taskIndex)} />
-            {new Array(task.numRemaining)
-              .fill(undefined)
-              .map((e, plannedTomatoIndex) => {
-                const key = `planned-tomato-${taskIndex}-${plannedTomatoIndex}`;
-                return <PlannedTomato key={key} />;
-              })
-            }
-          </Box>
-        );
-      })}
-    </>
+    <List>
+      <DndContainer dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
+        {tasks.map((task, taskIndex) => {
+          const taskId = `task-${taskIndex}`;
+          return (
+            <Draggable key={taskId}>
+              <ListItem>
+                <ListItemIcon className="drag-handle">
+                  <DragHandleIcon />
+                </ListItemIcon>
+                <TextField id={taskId} value={task.objective} /*fullWidth={true}*/
+                  // https://stackoverflow.com/a/56066985/49678:
+                  inputRef={input => input && taskIndex === taskIndexToFocus && input.focus()}
+                  onChange={(e) => onChange(e, taskIndex)}
+                  onKeyDown={(e) => onKeyDown(e, taskIndex)}
+                  onFocus={(e) => onFocus(e, taskIndex)}
+                  onBlur={(e) => onBlur(e, taskIndex)}
+                  />
+                {new Array(task.numRemaining)
+                  .fill(undefined)
+                  .map((e, plannedTomatoIndex) => {
+                    const key = `planned-tomato-${taskIndex}-${plannedTomatoIndex}`;
+                    return <PlannedTomato key={key} />;
+                  })
+                }
+              </ListItem>
+            </Draggable>
+          );
+        })}
+      </DndContainer>
+    </List>
   );
 }
