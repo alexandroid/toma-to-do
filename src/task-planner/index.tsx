@@ -82,7 +82,7 @@ export default function TaskPlannerController({
           event.preventDefault();
         }
       }}
-      onFocus={(_, taskIndex) => setTaskIndexToFocusNext(taskIndex) }
+      onFocus={(_, taskIndex) => setTaskIndexToFocusNext(taskIndex)}
       onBlur={(_, taskIndex) => {
         if (taskIndexToFocusNext === taskIndex) {
           //setTaskIndexToFocusNext(null);
@@ -92,24 +92,12 @@ export default function TaskPlannerController({
         if (removedIndex !== null && addedIndex !== null) {
           setTasks(
             produce(tasks, draft => {
-                const task = tasks[removedIndex];
-                draft.splice(removedIndex, 1);
-                draft.splice(addedIndex, 0, task);
+              const task = tasks[removedIndex];
+              draft.splice(removedIndex, 1);
+              draft.splice(addedIndex, 0, task);
             })
           );
           setTaskIndexToFocusNext(addedIndex);
-          // Initial logic version: Preserve the focus on the task regardless of which task was moved:
-          // if (taskIndexToFocusNext === removedIndex) {
-          //   // special case - focused task was dragged and dropped:
-          //   setTaskIndexToFocusNext(addedIndex);
-          // } else if(taskIndexToFocusNext !== null) {
-          //   let focusedTaskIndex = taskIndexToFocusNext;
-          //   if (removedIndex < taskIndexToFocusNext) { focusedTaskIndex -= 1; }
-          //   if (addedIndex <= focusedTaskIndex) { focusedTaskIndex +=1; }
-          //   if (taskIndexToFocusNext !== focusedTaskIndex) {
-          //     setTaskIndexToFocusNext(focusedTaskIndex);
-          //   }
-          // }
         }
       }}
     />);
@@ -152,7 +140,7 @@ function TaskPlannerView({
                   onKeyDown={(e) => onKeyDown(e, taskIndex)}
                   onFocus={(e) => onFocus(e, taskIndex)}
                   onBlur={(e) => onBlur(e, taskIndex)}
-                  />
+                />
                 {new Array(task.numRemaining)
                   .fill(undefined)
                   .map((e, plannedTomatoIndex) => {
