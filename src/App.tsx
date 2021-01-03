@@ -11,8 +11,6 @@ import TaskPlannerController from './task-planner';
 import { BLANK_TASK, DEFAULT_REST_DURATION_MINS, DEFAULT_WORK_DURATION_MINS, TaskFocusIndex } from './data-model';
 import { PropTypes, TextField } from '@material-ui/core';
 
-// type State = 'planning' | 'working';
-
 function SettingsButton() {
   return (
     <Button variant="contained" color="default" startIcon={<SettingsIcon />} component={RouteLink} to={"/settings"}>
@@ -83,24 +81,26 @@ function App() {
             setTasks={setTasks}
             taskIndexToFocusNext={taskIndexToFocusNext}
             setTaskIndexToFocusNext={setTaskIndexToFocusNext}
+            taskPlannerState="planning"
           /><br />
           <SettingsButton />&nbsp;
             <Button variant="contained" color="primary" component={RouteLink} to={"/working"}>
-            Start working
+              Work on tasks
             </Button>
         </Container>
       </Route>
       <Route path="/working">
         <Container>
-          <h1>Working on tasks</h1>
+          <h1>Working on tasks ({toGoString})</h1>
           <TaskPlannerController
             tasks={tasks}
             setTasks={setTasks}
             taskIndexToFocusNext={taskIndexToFocusNext}
             setTaskIndexToFocusNext={setTaskIndexToFocusNext}
+            taskPlannerState="working"
           /><br />
           <SettingsButton />&nbsp;
-            <PlanTasksButton color="default" />
+          <PlanTasksButton color="default" />
         </Container>
       </Route>
     </Switch>

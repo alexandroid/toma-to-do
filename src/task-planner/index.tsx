@@ -5,29 +5,62 @@ import produce from 'immer';
 
 import { PlannedTomato } from '../tomato-icons';
 import { BLANK_TASK, Task, TaskFocusIndex } from '../data-model';
-import { Button, IconButton, List, ListItem, ListItemIcon } from '@material-ui/core';
+import { Button, IconButton, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
 import { Container as DndContainer, Draggable, DropResult } from 'react-smooth-dnd';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
+
+export type TaskPlannerState = 'planning' | 'working';
 
 export type TaskPlannerControllerProps = {
   setTasks: (tasks: Task[]) => void;
   setTaskIndexToFocusNext: (taskIndexToFocusNext: TaskFocusIndex) => void;
   tasks: Task[];
   taskIndexToFocusNext: TaskFocusIndex;
+  taskPlannerState: TaskPlannerState;
 }
 
 export default function TaskPlannerController({
   tasks,
   setTasks,
   taskIndexToFocusNext,
-  setTaskIndexToFocusNext
+  setTaskIndexToFocusNext,
+  taskPlannerState,
 }: TaskPlannerControllerProps) {
+  function addNewTaskAfter(taskIndex: number) {
+    setTasks(
+      produce(tasks, draft => {
+        draft.splice(taskIndex + 1, 0, BLANK_TASK);
+      })
+    );
+  }
+
+  function incrementTaskRemainingTomatoes(taskIndex: number) {
+    if (taskPlannerState === 'planning') {
+      setTasks(
+        produce(tasks, draft => {
+          draft[taskIndex].numRemaining++;
+        })
+      )
+    }
+  }
+
+  function decrementTaskRemainingTomatoes(taskIndex: number) {
+    if (taskPlannerState === 'planning' && tasks[taskIndex].numRemaining > 1) {
+      setTasks(
+        produce(tasks, draft => {
+          draft[taskIndex].numRemaining--;
+        })
+      )
+    }
+  }
+
   return (
     <TaskPlannerView
       tasks={tasks}
       taskIndexToFocus={taskIndexToFocusNext}
+      taskPlannerState={taskPlannerState}
       onChange={(event, taskIndex) => {
         setTasks(
           produce(tasks, draft => {
@@ -38,34 +71,19 @@ export default function TaskPlannerController({
       onKeyDown={(event, taskIndex) => {
         // TODO: Hanlde 'Tab' focus change
         if (event.key === 'Enter') {
-          //console.log(`enter pressed, lastInsertedIndex: ${taskIndex+1}`);
-          setTasks(
-            produce(tasks, draft => {
-              draft.splice(taskIndex + 1, 0, BLANK_TASK);
-            })
-          );
+          addNewTaskAfter(taskIndex);
           setTaskIndexToFocusNext(taskIndex + 1);
           event.preventDefault();
         } else if (event.key === 'ArrowUp') {
           if (event.ctrlKey) {
-            setTasks(
-              produce(tasks, draft => {
-                draft[taskIndex].numRemaining++;
-              })
-            )
+            incrementTaskRemainingTomatoes(taskIndex);
           } else if (taskIndexToFocusNext !== null && taskIndexToFocusNext > 0) {
             setTaskIndexToFocusNext(taskIndexToFocusNext - 1);
           }
           event.preventDefault();
         } else if (event.key === 'ArrowDown') {
           if (event.ctrlKey) {
-            if (tasks[taskIndex].numRemaining > 1) {
-              setTasks(
-                produce(tasks, draft => {
-                  draft[taskIndex].numRemaining--;
-                })
-              )
-            }
+            decrementTaskRemainingTomatoes(taskIndex);
           } else if (tasks.length > 0 && taskIndexToFocusNext !== null && taskIndexToFocusNext < tasks.length - 1) {
             setTaskIndexToFocusNext(taskIndexToFocusNext + 1);
           }
@@ -102,28 +120,15 @@ export default function TaskPlannerController({
           setTaskIndexToFocusNext(addedIndex);
         }
       }}
-      onAddTomatoClick={(taskIndex) => {
-        setTasks(
-          produce(tasks, draft => {
-            draft[taskIndex].numRemaining++;
-          })
-        );
-      }}
-      onRemoveTomatoClick={(taskIndex) => {
-        if (tasks[taskIndex].numRemaining > 1) {
-          setTasks(
-            produce(tasks, draft => {
-              draft[taskIndex].numRemaining--;
-            })
-          )
-        }
-      }}
+      onAddTomatoClick={(taskIndex) => incrementTaskRemainingTomatoes(taskIndex)}
+      onRemoveTomatoClick={(taskIndex) => decrementTaskRemainingTomatoes(taskIndex)}
     />);
 }
 
 type TaskPlannerViewProps = {
   tasks: Task[];
   taskIndexToFocus: TaskFocusIndex;
+  taskPlannerState: TaskPlannerState;
   onChange: (event: any, taskIndex: number) => void;
   onKeyDown: (event: any, taskIndex: number) => void;
   onFocus: (event: any, taskIndex: number) => void;
@@ -136,6 +141,7 @@ type TaskPlannerViewProps = {
 function TaskPlannerView({
   tasks,
   taskIndexToFocus,
+  taskPlannerState,
   onChange,
   onKeyDown,
   onFocus,
@@ -155,16 +161,39 @@ function TaskPlannerView({
                 <ListItemIcon className="drag-handle">
                   <DragHandleIcon />
                 </ListItemIcon>
-                <TextField id={taskId} value={task.objective} /*fullWidth={true}*/
-                  // https://stackoverflow.com/a/56066985/49678:
-                  inputRef={input => input && taskIndex === taskIndexToFocus && input.focus()}
-                  onChange={(e) => onChange(e, taskIndex)}
-                  onKeyDown={(e) => onKeyDown(e, taskIndex)}
-                  onFocus={(e) => onFocus(e, taskIndex)}
-                  onBlur={(e) => onBlur(e, taskIndex)}
-                />
-                &nbsp;<IconButton color="default" component="button" size="small" aria-label="increase planned tomatoes by one" onClick={() => onAddTomatoClick(taskIndex)}><AddIcon /></IconButton>
-                &nbsp;<IconButton color="default" component="button" size="small" disabled={task.numRemaining <= 1} aria-label="decrease planned tomatoes by one" onClick={() => onRemoveTomatoClick(taskIndex)}><RemoveIcon /></IconButton>
+                {taskPlannerState === 'planning' ? (
+                  <>
+                    <TextField
+                      id={taskId}
+                      value={task.objective}
+                      // https://stackoverflow.com/a/56066985/49678:
+                      inputRef={input => input && taskIndex === taskIndexToFocus && input.focus()}
+                      onChange={(e) => onChange(e, taskIndex)}
+                      onKeyDown={(e) => onKeyDown(e, taskIndex)}
+                      onFocus={(e) => onFocus(e, taskIndex)}
+                      onBlur={(e) => onBlur(e, taskIndex)}
+                    />
+                    &nbsp;<IconButton
+                      color="default"
+                      component="button"
+                      size="small"
+                      aria-label="increase planned tomatoes by one"
+                      onClick={() => onAddTomatoClick(taskIndex)}>
+                        <AddIcon />
+                    </IconButton>
+                    &nbsp;<IconButton
+                      color="default"
+                      component="button"
+                      size="small"
+                      disabled={task.numRemaining <= 1}
+                      aria-label="decrease planned tomatoes by one"
+                      onClick={() => onRemoveTomatoClick(taskIndex)}>
+                        <RemoveIcon />
+                    </IconButton>
+                  </>
+                ): /* taskPlannerState === 'working' at this point */ (
+                  <Typography>{task.objective}</Typography>
+                ) }
                 {new Array(task.numRemaining)
                   .fill(undefined)
                   .map((e, plannedTomatoIndex) => {
@@ -172,6 +201,11 @@ function TaskPlannerView({
                     return <PlannedTomato key={key} />;
                   })
                 }
+                {taskPlannerState === 'working' && taskIndex === taskIndexToFocus ? (
+                  <>
+                    &nbsp;<Button variant="contained" color="default" component="button">Start working</Button>
+                  </>
+                ) : null}
               </ListItem>
             </Draggable>
           );
