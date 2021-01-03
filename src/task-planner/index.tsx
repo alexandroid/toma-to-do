@@ -5,9 +5,11 @@ import produce from 'immer';
 
 import { PlannedTomato } from '../tomato-icons';
 import { BLANK_TASK, Task, TaskFocusIndex } from '../data-model';
-import { List, ListItem, ListItemIcon } from '@material-ui/core';
+import { Button, IconButton, List, ListItem, ListItemIcon } from '@material-ui/core';
 import { Container as DndContainer, Draggable, DropResult } from 'react-smooth-dnd';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Remove';
 
 export type TaskPlannerControllerProps = {
   setTasks: (tasks: Task[]) => void;
@@ -100,6 +102,22 @@ export default function TaskPlannerController({
           setTaskIndexToFocusNext(addedIndex);
         }
       }}
+      onAddTomatoClick={(taskIndex) => {
+        setTasks(
+          produce(tasks, draft => {
+            draft[taskIndex].numRemaining++;
+          })
+        );
+      }}
+      onRemoveTomatoClick={(taskIndex) => {
+        if (tasks[taskIndex].numRemaining > 1) {
+          setTasks(
+            produce(tasks, draft => {
+              draft[taskIndex].numRemaining--;
+            })
+          )
+        }
+      }}
     />);
 }
 
@@ -111,6 +129,8 @@ type TaskPlannerViewProps = {
   onFocus: (event: any, taskIndex: number) => void;
   onBlur: (event: any, taskIndex: number) => void;
   onDrop: (_: DropResult) => void;
+  onAddTomatoClick: (taskIndex: number) => void;
+  onRemoveTomatoClick: (taskIndex: number) => void;
 };
 
 function TaskPlannerView({
@@ -120,7 +140,9 @@ function TaskPlannerView({
   onKeyDown,
   onFocus,
   onBlur,
-  onDrop
+  onDrop,
+  onAddTomatoClick,
+  onRemoveTomatoClick,
 }: TaskPlannerViewProps) {
   return (
     <List>
@@ -141,6 +163,8 @@ function TaskPlannerView({
                   onFocus={(e) => onFocus(e, taskIndex)}
                   onBlur={(e) => onBlur(e, taskIndex)}
                 />
+                &nbsp;<IconButton color="default" component="button" size="small" aria-label="increase planned tomatoes by one" onClick={() => onAddTomatoClick(taskIndex)}><AddIcon /></IconButton>
+                &nbsp;<IconButton color="default" component="button" size="small" disabled={task.numRemaining <= 1} aria-label="decrease planned tomatoes by one" onClick={() => onRemoveTomatoClick(taskIndex)}><RemoveIcon /></IconButton>
                 {new Array(task.numRemaining)
                   .fill(undefined)
                   .map((e, plannedTomatoIndex) => {

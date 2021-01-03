@@ -98,7 +98,7 @@ function App() {
             setTasks={setTasks}
             taskIndexToFocusNext={taskIndexToFocusNext}
             setTaskIndexToFocusNext={setTaskIndexToFocusNext}
-          />
+          /><br />
           <SettingsButton />&nbsp;
             <PlanTasksButton color="default" />
         </Container>
