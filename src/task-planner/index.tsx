@@ -203,7 +203,12 @@ function TaskPlannerView({
                 }
                 {taskPlannerState === 'working' && taskIndex === taskIndexToFocus ? (
                   <>
-                    &nbsp;<Button variant="contained" color="default" component="button">Start working</Button>
+                    &nbsp;<Button
+                      variant="contained"
+                      color="default"
+                      component="button">{
+                        task.taskNextStep === 'work' ? 'Start working' : 'Start resting'
+                      }</Button>
                   </>
                 ) : null}
               </ListItem>
