@@ -29,11 +29,13 @@ export default function TaskPlannerController({
   taskPlannerState,
 }: TaskPlannerControllerProps) {
   function addNewTaskAfter(taskIndex: number) {
-    setTasks(
-      produce(tasks, draft => {
-        draft.splice(taskIndex + 1, 0, BLANK_TASK);
-      })
-    );
+    if (taskPlannerState === 'planning') {
+      setTasks(
+        produce(tasks, draft => {
+          draft.splice(taskIndex + 1, 0, BLANK_TASK);
+        })
+      );
+    }
   }
 
   function incrementTaskRemainingTomatoes(taskIndex: number) {
@@ -89,7 +91,7 @@ export default function TaskPlannerController({
           }
           event.preventDefault();
         } else if (event.key === 'Delete' && event.ctrlKey) {
-          if (tasks.length > 1) {
+          if (tasks.length > 1 && taskPlannerState === 'planning') {
             setTasks(
               produce(tasks, draft => {
                 draft.splice(taskIndex, 1)
@@ -192,7 +194,17 @@ function TaskPlannerView({
                     </IconButton>
                   </>
                 ): /* taskPlannerState === 'working' at this point */ (
-                  <Typography>{task.objective}</Typography>
+                  <Typography>
+                    <span
+                      tabIndex={0} // enables tab selection for non-input elements
+                      onKeyDown={(e) => onKeyDown(e, taskIndex)}
+                      onFocus={(e) => onFocus(e, taskIndex)}
+                      onBlur={(e) => onBlur(e, taskIndex)}
+                      ref={elem => elem && taskIndex === taskIndexToFocus && elem.focus()}
+                    >
+                      {task.objective}
+                    </span>
+                  </Typography>
                 ) }
                 {new Array(task.numRemaining)
                   .fill(undefined)
