@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 //import logo from './logo.svg';
 //import './App.css';
-//import CssBaseline from '@material-ui/core/CssBaseline';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -42,68 +42,70 @@ function App() {
   const toGoString = computeToGoString(remainingWorkDurationHours, remainingWorkDurationMins);
 
   return (
-    <Switch>
-      <Route path="/settings" exact={true}>
-        <Container>
-          <h1>Settings</h1>
-          <TextField
-            variant="filled"
-            type="number"
-            value={tomatoWorkDurationMinutes}
-            onChange={(e) => setTomatoWorkDurationMinutes(parseInt(e.target.value))}
-            label="Work duration, minutes"
-          /><br />&nbsp;<br />
-          <TextField
-            variant="filled"
-            type="number"
-            value={tomatoRestDurationMinutes}
-            onChange={(e) => setTomatoRestDurationMinutes(parseInt(e.target.value))}
-            label="Rest duration, minutes"
-          /><br />&nbsp;<br />
-          <Button
-            variant="contained"
-            color="secondary"
-            disabled={tomatoWorkDurationMinutes === DEFAULT_WORK_DURATION_MINS && tomatoRestDurationMinutes === DEFAULT_REST_DURATION_MINS}
-            onClick={() => {
-              setTomatoWorkDurationMinutes(DEFAULT_WORK_DURATION_MINS);
-              setTomatoRestDurationMinutes(DEFAULT_REST_DURATION_MINS);
-            }}>
-            Reset to 25/5
-            </Button>&nbsp;
-            <PlanTasksButton color="primary" />
-        </Container>
-      </Route>
-      <Route path="/" exact={true}>
-        <Container>
-          <h1>Planning tasks ({toGoString})</h1>
-          <TaskPlannerController
-            tasks={tasks}
-            setTasks={setTasks}
-            taskIndexToFocusNext={taskIndexToFocusNext}
-            setTaskIndexToFocusNext={setTaskIndexToFocusNext}
-            taskPlannerState="planning"
-          /><br />
-          <SettingsButton />&nbsp;
-            <Button variant="contained" color="primary" component={RouteLink} to={"/working"}>
-              Work on tasks
-            </Button>
-        </Container>
-      </Route>
-      <Route path="/working">
-        <Container>
-          <h1>Working on tasks ({toGoString})</h1>
-          <TaskPlannerController
-            tasks={tasks}
-            setTasks={setTasks}
-            taskIndexToFocusNext={taskIndexToFocusNext}
-            setTaskIndexToFocusNext={setTaskIndexToFocusNext}
-            taskPlannerState="working"
-          /><br />
-          <SettingsButton />&nbsp;
-          <PlanTasksButton color="default" />
-        </Container>
-      </Route>
-    </Switch>
+    <CssBaseline>
+      <Switch>
+        <Route path="/settings" exact={true}>
+          <Container>
+            <h1>Settings</h1>
+            <TextField
+              variant="filled"
+              type="number"
+              value={tomatoWorkDurationMinutes}
+              onChange={(e) => setTomatoWorkDurationMinutes(parseInt(e.target.value))}
+              label="Work duration, minutes"
+            /><br />&nbsp;<br />
+            <TextField
+              variant="filled"
+              type="number"
+              value={tomatoRestDurationMinutes}
+              onChange={(e) => setTomatoRestDurationMinutes(parseInt(e.target.value))}
+              label="Rest duration, minutes"
+            /><br />&nbsp;<br />
+            <Button
+              variant="contained"
+              color="secondary"
+              disabled={tomatoWorkDurationMinutes === DEFAULT_WORK_DURATION_MINS && tomatoRestDurationMinutes === DEFAULT_REST_DURATION_MINS}
+              onClick={() => {
+                setTomatoWorkDurationMinutes(DEFAULT_WORK_DURATION_MINS);
+                setTomatoRestDurationMinutes(DEFAULT_REST_DURATION_MINS);
+              }}>
+              Reset to 25/5
+              </Button>&nbsp;
+              <PlanTasksButton color="primary" />
+          </Container>
+        </Route>
+        <Route path="/" exact={true}>
+          <Container>
+            <h1>Planning tasks ({toGoString})</h1>
+            <TaskPlannerController
+              tasks={tasks}
+              setTasks={setTasks}
+              taskIndexToFocusNext={taskIndexToFocusNext}
+              setTaskIndexToFocusNext={setTaskIndexToFocusNext}
+              taskPlannerState="planning"
+            /><br />
+            <SettingsButton />&nbsp;
+              <Button variant="contained" color="primary" component={RouteLink} to={"/working"}>
+                Work on tasks
+              </Button>
+          </Container>
+        </Route>
+        <Route path="/working">
+          <Container>
+            <h1>Working on tasks ({toGoString})</h1>
+            <TaskPlannerController
+              tasks={tasks}
+              setTasks={setTasks}
+              taskIndexToFocusNext={taskIndexToFocusNext}
+              setTaskIndexToFocusNext={setTaskIndexToFocusNext}
+              taskPlannerState="working"
+            /><br />
+            <SettingsButton />&nbsp;
+            <PlanTasksButton color="default" />
+          </Container>
+        </Route>
+      </Switch>
+    </CssBaseline>
   );
 }
 
