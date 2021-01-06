@@ -19,6 +19,8 @@ export type TaskPlannerControllerProps = {
   tasks: Task[];
   taskIndexToFocusNext: TaskFocusIndex;
   taskPlannerState: TaskPlannerState;
+  tomatoWorkDurationMinutes: number;
+  tomatoRestDurationMinutes: number;
 }
 
 export default function TaskPlannerController({
@@ -27,6 +29,8 @@ export default function TaskPlannerController({
   taskIndexToFocusNext,
   setTaskIndexToFocusNext,
   taskPlannerState,
+  tomatoWorkDurationMinutes,
+  tomatoRestDurationMinutes,
 }: TaskPlannerControllerProps) {
   function addNewTaskAfter(taskIndex: number) {
     if (taskPlannerState === 'planning') {
@@ -124,6 +128,16 @@ export default function TaskPlannerController({
       }}
       onAddTomatoClick={(taskIndex) => incrementTaskRemainingTomatoes(taskIndex)}
       onRemoveTomatoClick={(taskIndex) => decrementTaskRemainingTomatoes(taskIndex)}
+      onStartWorkingRestingClick={(taskIndex) => {
+        setTasks(
+          produce(tasks, draft => {
+            const task = draft[taskIndex];
+            const nextStepDurationMins = task.taskNextStep === 'work' ? tomatoWorkDurationMinutes : tomatoRestDurationMinutes;
+            task.executionOrRestEndTime = Date.now() + nextStepDurationMins * 60 * 1000;
+            task.taskNextStep = 'rest';
+          })
+        )
+      }}
     />);
 }
 
@@ -138,6 +152,7 @@ type TaskPlannerViewProps = {
   onDrop: (_: DropResult) => void;
   onAddTomatoClick: (taskIndex: number) => void;
   onRemoveTomatoClick: (taskIndex: number) => void;
+  onStartWorkingRestingClick: (taskIndex: number) => void;
 };
 
 function TaskPlannerView({
@@ -151,6 +166,7 @@ function TaskPlannerView({
   onDrop,
   onAddTomatoClick,
   onRemoveTomatoClick,
+  onStartWorkingRestingClick,
 }: TaskPlannerViewProps) {
   return (
     <List>
@@ -213,12 +229,17 @@ function TaskPlannerView({
                     return <PlannedTomato key={key} />;
                   })
                 }
-                {taskPlannerState === 'working' && taskIndex === taskIndexToFocus ? (
+                {taskPlannerState === 'working' && task.executionOrRestEndTime !== undefined ? (
+                  <>{task.executionOrRestEndTime}</>
+                ) : null}
+                {taskPlannerState === 'working' && taskIndex === taskIndexToFocus && task.executionOrRestEndTime === undefined ? (
                   <>
                     &nbsp;<Button
                       variant="contained"
                       color="default"
-                      component="button">{
+                      component="button"
+                      onClick={() => onStartWorkingRestingClick(taskIndex)}
+                      >{
                         task.taskNextStep === 'work' ? 'Start working' : 'Start resting'
                       }</Button>
                   </>

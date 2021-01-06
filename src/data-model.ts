@@ -1,9 +1,8 @@
 export type Task = {
   objective: string;
   numDone: number;
-  inProgressUntilTime: number | undefined; // undefined means the task is not in progress
   numRemaining: number;
-  executionOrRestEndTime: number | undefined;
+  executionOrRestEndTime: number | undefined; // undefined means the task is not in progress
   taskNextStep: TaskNextStep;
 };
 
@@ -17,7 +16,6 @@ export type TaskFocusIndex = number | null;
 export const BLANK_TASK: Task = {
   objective: 'Test task',
   numDone: 0,
-  inProgressUntilTime: undefined,
   numRemaining: 1,
   executionOrRestEndTime: undefined,
   taskNextStep: 'work',

@@ -83,6 +83,8 @@ function App() {
               taskIndexToFocusNext={taskIndexToFocusNext}
               setTaskIndexToFocusNext={setTaskIndexToFocusNext}
               taskPlannerState="planning"
+              tomatoWorkDurationMinutes={tomatoWorkDurationMinutes}
+              tomatoRestDurationMinutes={tomatoRestDurationMinutes}
             /><br />
             <SettingsButton />&nbsp;
               <Button variant="contained" color="primary" component={RouteLink} to={"/working"}>
@@ -99,6 +101,8 @@ function App() {
               taskIndexToFocusNext={taskIndexToFocusNext}
               setTaskIndexToFocusNext={setTaskIndexToFocusNext}
               taskPlannerState="working"
+              tomatoWorkDurationMinutes={tomatoWorkDurationMinutes}
+              tomatoRestDurationMinutes={tomatoRestDurationMinutes}
             /><br />
             <SettingsButton />&nbsp;
             <PlanTasksButton color="default" />
