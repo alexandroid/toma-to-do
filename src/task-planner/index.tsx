@@ -153,6 +153,7 @@ type TaskPlannerViewProps = {
   onAddTomatoClick: (taskIndex: number) => void;
   onRemoveTomatoClick: (taskIndex: number) => void;
   onStartWorkingRestingClick: (taskIndex: number) => void;
+  nowFn?: () => number;
 };
 
 function TaskPlannerView({
@@ -167,6 +168,7 @@ function TaskPlannerView({
   onAddTomatoClick,
   onRemoveTomatoClick,
   onStartWorkingRestingClick,
+  nowFn = Date.now,
 }: TaskPlannerViewProps) {
   return (
     <List>
@@ -230,7 +232,7 @@ function TaskPlannerView({
                   })
                 }
                 {taskPlannerState === 'working' && task.executionOrRestEndTime !== undefined ? (
-                  <>{task.executionOrRestEndTime}</>
+                  <>{formatRemainingTime(task.executionOrRestEndTime, nowFn())}</>
                 ) : null}
                 {taskPlannerState === 'working' && taskIndex === taskIndexToFocus && task.executionOrRestEndTime === undefined ? (
                   <>
@@ -251,4 +253,24 @@ function TaskPlannerView({
       </DndContainer>
     </List>
   );
+}
+
+function formatRemainingTime(endTime: number, currentTime: number) {
+  const diffSeconds = Math.trunc((endTime - currentTime) / 1000);
+  if (diffSeconds > 0) {
+    const s = diffSeconds % 60;
+    const diffMinutes = Math.trunc(diffSeconds / 60);
+    const m = diffMinutes % 60;
+    const h = Math.trunc(diffMinutes / 60);
+    if (h > 0) {
+      return `${padZeroes(h)}:${padZeroes(m)}:${padZeroes(s)}`;
+    } else { // always print sero minutes
+      return `${padZeroes(m)}:${padZeroes(s)}`;
+    }
+  }
+  return '00:00';
+}
+
+function padZeroes(n: number) {
+  return n.toString().padStart(2, '0');
 }
