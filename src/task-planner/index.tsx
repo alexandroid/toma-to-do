@@ -1,20 +1,12 @@
-import React from 'react';
-import TextField from '@material-ui/core/TextField';
-//import Box from '@material-ui/core/Box';
+import React, { useRef } from 'react';
 import produce from 'immer';
 
-import { PlannedTomato } from '../tomato-icons';
-import { BLANK_TASK, Task, TaskFocusIndex } from '../data-model';
-import { Button, IconButton, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
-import { Container as DndContainer, Draggable, DropResult } from 'react-smooth-dnd';
-import DragHandleIcon from '@material-ui/icons/DragHandle';
-import AddIcon from '@material-ui/icons/Add';
-import RemoveIcon from '@material-ui/icons/Remove';
-
-export type TaskPlannerState = 'planning' | 'working';
+import { BLANK_TASK, Task, TaskFocusIndex, TaskPlannerState } from '../data-model';
+import TaskPlannerView from './view';
+import { WritableDraft } from 'immer/dist/types/types-external';
 
 export type TaskPlannerControllerProps = {
-  setTasks: (tasks: Task[]) => void;
+  setTasks: React.Dispatch<React.SetStateAction<WritableDraft<Task>[]>>;
   setTaskIndexToFocusNext: (taskIndexToFocusNext: TaskFocusIndex) => void;
   tasks: Task[];
   taskIndexToFocusNext: TaskFocusIndex;
@@ -32,6 +24,9 @@ export default function TaskPlannerController({
   tomatoWorkDurationMinutes,
   tomatoRestDurationMinutes,
 }: TaskPlannerControllerProps) {
+  const timer = useRef<NodeJS.Timeout | undefined>(undefined);
+  const forceUpdate = React.useReducer(() => ({}), {})[1] as () => void;
+
   function addNewTaskAfter(taskIndex: number) {
     if (taskPlannerState === 'planning') {
       setTasks(
@@ -62,11 +57,50 @@ export default function TaskPlannerController({
     }
   }
 
+  function updateNowAndCheckIfTaskIsDone() {
+    const newNow = Date.now();
+    forceUpdate();
+    setTasks((oldTasks) =>
+      produce(oldTasks, draft => {
+
+        const taskIndexWhichEnded = draft.findIndex(task =>
+          task.executionOrRestEndTime !== undefined && task.executionOrRestEndTime <= newNow);
+
+        if(taskIndexWhichEnded < 0) {
+          return;
+        }
+
+        const task = draft[taskIndexWhichEnded];
+
+        task.executionOrRestEndTime = undefined;
+        // console.info(`Setting task[${taskIndexWhichEnded}]executionOrRestEndTime = undefined`);
+        if (timer.current !== undefined) { // should not happen, but just in case
+          // console.info('Stopping the timer...');
+          clearInterval(timer.current);
+          timer.current = undefined;
+        } else {
+          console.error('Unexpected timer to be undefined here');
+        }
+
+        if (task.taskNextStep === 'rest') {
+          // just finished working interval - update done/remaining tasks:
+          task.numDone = task.numDone + 1;
+          task.numRemaining = task.numRemaining > 0 ? task.numRemaining - 1 : 0;
+        } else { // task.taskNextStep === 'work'
+          // just finished resting interval - do nothing;
+        }
+      })
+    );
+  }
+
   return (
     <TaskPlannerView
       tasks={tasks}
       taskIndexToFocus={taskIndexToFocusNext}
       taskPlannerState={taskPlannerState}
+      tomatoWorkDurationMinutes={tomatoWorkDurationMinutes}
+      tomatoRestDurationMinutes={tomatoRestDurationMinutes}
+      nowFn={Date.now}
       onChange={(event, taskIndex) => {
         setTasks(
           produce(tasks, draft => {
@@ -133,144 +167,13 @@ export default function TaskPlannerController({
           produce(tasks, draft => {
             const task = draft[taskIndex];
             const nextStepDurationMins = task.taskNextStep === 'work' ? tomatoWorkDurationMinutes : tomatoRestDurationMinutes;
-            task.executionOrRestEndTime = Date.now() + nextStepDurationMins * 60 * 1000;
-            task.taskNextStep = 'rest';
+            task.executionOrRestEndTime = Date.now() + nextStepDurationMins /** * 60 */ * 1000;
+            //                                       using seconds for testing ^^^^^^
+            // console.info(`Setting end time: ${task.executionOrRestEndTime}`);
+            task.taskNextStep = task.taskNextStep === 'work' ? 'rest' : 'work';
           })
-        )
+        );
+        timer.current = setInterval(updateNowAndCheckIfTaskIsDone, 1000);
       }}
     />);
-}
-
-type TaskPlannerViewProps = {
-  tasks: Task[];
-  taskIndexToFocus: TaskFocusIndex;
-  taskPlannerState: TaskPlannerState;
-  onChange: (event: any, taskIndex: number) => void;
-  onKeyDown: (event: any, taskIndex: number) => void;
-  onFocus: (event: any, taskIndex: number) => void;
-  onBlur: (event: any, taskIndex: number) => void;
-  onDrop: (_: DropResult) => void;
-  onAddTomatoClick: (taskIndex: number) => void;
-  onRemoveTomatoClick: (taskIndex: number) => void;
-  onStartWorkingRestingClick: (taskIndex: number) => void;
-  nowFn?: () => number;
-};
-
-function TaskPlannerView({
-  tasks,
-  taskIndexToFocus,
-  taskPlannerState,
-  onChange,
-  onKeyDown,
-  onFocus,
-  onBlur,
-  onDrop,
-  onAddTomatoClick,
-  onRemoveTomatoClick,
-  onStartWorkingRestingClick,
-  nowFn = Date.now,
-}: TaskPlannerViewProps) {
-  return (
-    <List>
-      <DndContainer dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
-        {tasks.map((task, taskIndex) => {
-          const taskId = `task-${taskIndex}`;
-          return (
-            <Draggable key={taskId}>
-              <ListItem>
-                <ListItemIcon className="drag-handle">
-                  <DragHandleIcon />
-                </ListItemIcon>
-                {taskPlannerState === 'planning' ? (
-                  <>
-                    <TextField
-                      id={taskId}
-                      value={task.objective}
-                      // https://stackoverflow.com/a/56066985/49678:
-                      inputRef={input => input && taskIndex === taskIndexToFocus && input.focus()}
-                      onChange={(e) => onChange(e, taskIndex)}
-                      onKeyDown={(e) => onKeyDown(e, taskIndex)}
-                      onFocus={(e) => onFocus(e, taskIndex)}
-                      onBlur={(e) => onBlur(e, taskIndex)}
-                    />
-                    &nbsp;<IconButton
-                      color="default"
-                      component="button"
-                      size="small"
-                      aria-label="increase planned tomatoes by one"
-                      onClick={() => onAddTomatoClick(taskIndex)}>
-                        <AddIcon />
-                    </IconButton>
-                    &nbsp;<IconButton
-                      color="default"
-                      component="button"
-                      size="small"
-                      disabled={task.numRemaining <= 1}
-                      aria-label="decrease planned tomatoes by one"
-                      onClick={() => onRemoveTomatoClick(taskIndex)}>
-                        <RemoveIcon />
-                    </IconButton>
-                  </>
-                ): /* taskPlannerState === 'working' at this point */ (
-                  <Typography>
-                    <span
-                      tabIndex={0} // enables tab selection for non-input elements
-                      onKeyDown={(e) => onKeyDown(e, taskIndex)}
-                      onFocus={(e) => onFocus(e, taskIndex)}
-                      onBlur={(e) => onBlur(e, taskIndex)}
-                      ref={elem => elem && taskIndex === taskIndexToFocus && elem.focus()}
-                    >
-                      {task.objective}
-                    </span>
-                  </Typography>
-                ) }
-                {new Array(task.numRemaining)
-                  .fill(undefined)
-                  .map((e, plannedTomatoIndex) => {
-                    const key = `planned-tomato-${taskIndex}-${plannedTomatoIndex}`;
-                    return <PlannedTomato key={key} />;
-                  })
-                }
-                {taskPlannerState === 'working' && task.executionOrRestEndTime !== undefined ? (
-                  <>{formatRemainingTime(task.executionOrRestEndTime, nowFn())}</>
-                ) : null}
-                {taskPlannerState === 'working' && taskIndex === taskIndexToFocus && task.executionOrRestEndTime === undefined ? (
-                  <>
-                    &nbsp;<Button
-                      variant="contained"
-                      color="default"
-                      component="button"
-                      onClick={() => onStartWorkingRestingClick(taskIndex)}
-                      >{
-                        task.taskNextStep === 'work' ? 'Start working' : 'Start resting'
-                      }</Button>
-                  </>
-                ) : null}
-              </ListItem>
-            </Draggable>
-          );
-        })}
-      </DndContainer>
-    </List>
-  );
-}
-
-function formatRemainingTime(endTime: number, currentTime: number) {
-  const diffSeconds = Math.trunc((endTime - currentTime) / 1000);
-  if (diffSeconds > 0) {
-    const s = diffSeconds % 60;
-    const diffMinutes = Math.trunc(diffSeconds / 60);
-    const m = diffMinutes % 60;
-    const h = Math.trunc(diffMinutes / 60);
-    if (h > 0) {
-      return `${padZeroes(h)}:${padZeroes(m)}:${padZeroes(s)}`;
-    } else { // always print sero minutes
-      return `${padZeroes(m)}:${padZeroes(s)}`;
-    }
-  }
-  return '00:00';
-}
-
-function padZeroes(n: number) {
-  return n.toString().padStart(2, '0');
 }

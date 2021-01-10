@@ -31,8 +31,8 @@ function App() {
   // const [state, setState] = useState('planning' as State);
   const [tasks, setTasks] = useState([produce(BLANK_TASK, draft => draft)]);
   const [taskIndexToFocusNext, setTaskIndexToFocusNext] = useState<TaskFocusIndex>(0);
-  const [tomatoWorkDurationMinutes, setTomatoWorkDurationMinutes] = useState(25);
-  const [tomatoRestDurationMinutes, setTomatoRestDurationMinutes] = useState(5);
+  const [tomatoWorkDurationMinutes, setTomatoWorkDurationMinutes] = useState(DEFAULT_WORK_DURATION_MINS);
+  const [tomatoRestDurationMinutes, setTomatoRestDurationMinutes] = useState(DEFAULT_REST_DURATION_MINS);
 
   const remainingWorkDurationTotalMinutes = tasks
     .map((task) => task.numRemaining)
