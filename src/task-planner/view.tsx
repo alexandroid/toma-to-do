@@ -43,6 +43,9 @@ export default function TaskPlannerView({
   onRemoveTomatoClick,
   onStartWorkingRestingClick,
 }: TaskPlannerViewProps) {
+  const taskInProgressIndex = tasks.findIndex(task => task.executionOrRestEndTime !== undefined);
+  const isTaskInProgress = taskInProgressIndex >= 0;
+
   return (
     <List>
       <DndContainer dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
@@ -101,7 +104,7 @@ export default function TaskPlannerView({
                 {taskPlannerState === 'working' ? (
                   <>{formatRemainingTime(tasks[taskIndex], nowFn(), tomatoWorkDurationMinutes, tomatoRestDurationMinutes)}</>
                 ) : null}
-                {taskPlannerState === 'working' && taskIndex === taskIndexToFocus && task.executionOrRestEndTime === undefined ? (
+                {taskPlannerState === 'working' && !isTaskInProgress && taskIndex === taskIndexToFocus ? (
                   <>
                     &nbsp;<Button
                       variant="contained"
