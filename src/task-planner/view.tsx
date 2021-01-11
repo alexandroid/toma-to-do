@@ -7,7 +7,7 @@ import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 import TextField from '@material-ui/core/TextField';
 
-import { DoneTomato, PlannedTomato } from '../tomato-icons';
+import { DoneTomato, InProgressTomato, PlannedTomato } from '../tomato-icons';
 
 
 export type TaskPlannerViewProps = {
@@ -97,19 +97,7 @@ export default function TaskPlannerView({
                     </span>
                   </Typography>
                 ) }
-                {new Array(task.numDone).fill(undefined)
-                  .map((_, doneTomatoIndex) => {
-                    const key = `done-tomato-${taskIndex}-${doneTomatoIndex}`;
-                    return <DoneTomato key={key} />;
-                  })
-                }
-                {new Array(task.numRemaining)
-                  .fill(undefined)
-                  .map((_, plannedTomatoIndex) => {
-                    const key = `planned-tomato-${taskIndex}-${plannedTomatoIndex}`;
-                    return <PlannedTomato key={key} />;
-                  })
-                }
+                <TaskTomatoes task={task} taskIndex={taskIndex} />
                 {taskPlannerState === 'working' ? (
                   <>{formatRemainingTime(tasks[taskIndex], nowFn(), tomatoWorkDurationMinutes, tomatoRestDurationMinutes)}</>
                 ) : null}
@@ -131,6 +119,42 @@ export default function TaskPlannerView({
         })}
       </DndContainer>
     </List>
+  );
+}
+
+function TaskTomatoes({ task, taskIndex }: { task: Task, taskIndex: number }) {
+  // If the task is in "working" mode, we want to display the first remaining tomato
+  // as the "in progress one". Moreover, if there are no "remaining" tomatoes planned,
+  // we still want to show an in-progress one. We don't want to force-add a new "remaining"
+  // tomato upon a new working segment, since it could have been an accidental click
+  // and we don't want to have a new planned tomato after the user cancels it.
+  const isWorkingInProgress = task.executionOrRestEndTime !== undefined && task.taskNextStep === 'rest';
+  const numInProgress = isWorkingInProgress ? 1 : 0;
+  const numRemaining = isWorkingInProgress ? Math.max(0, task.numRemaining - 1) : task.numRemaining;
+
+  return (
+    <>
+      {new Array(task.numDone).fill(undefined)
+        .map((_, doneTomatoIndex) => {
+          const key = `done-tomato-${taskIndex}-${doneTomatoIndex}`;
+          return <DoneTomato key={key} />;
+        })
+      }
+      {new Array(numInProgress)
+        .fill(undefined)
+        .map((_, plannedTomatoIndex) => {
+          const key = `in-progress-tomato-${taskIndex}-${plannedTomatoIndex}`;
+          return <InProgressTomato key={key} />;
+        })
+      }
+      {new Array(numRemaining)
+        .fill(undefined)
+        .map((_, plannedTomatoIndex) => {
+          const key = `planned-tomato-${taskIndex}-${plannedTomatoIndex}`;
+          return <PlannedTomato key={key} />;
+        })
+      }
+    </>
   );
 }
 

@@ -2,7 +2,11 @@ export type Task = {
   objective: string;
   numDone: number;
   numRemaining: number;
-  executionOrRestEndTime: number | undefined; // undefined means the task is not in progress
+  // Undefined means the task is not in progress.
+  executionOrRestEndTime: number | undefined;
+  // For in-progress tasks it indicates the step *after* the current in-progress activity is done.
+  // For example, if executionOrRestEndTime !== undefined and this is equals to 'work' then it means
+  // the task is in "resting" mode.
   taskNextStep: TaskNextStep;
 };
 
