@@ -7,6 +7,7 @@ import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 import TextField from '@material-ui/core/TextField';
 
+import './planner.css';
 import { DoneTomato, InProgressTomato, PlannedTomato } from '../tomato-icons';
 
 
@@ -44,15 +45,15 @@ export default function TaskPlannerView({
   onStartWorkingRestingClick,
 }: TaskPlannerViewProps) {
   const taskInProgressIndex = tasks.findIndex(task => task.executionOrRestEndTime !== undefined);
-  const isTaskInProgress = taskInProgressIndex >= 0;
+  const isSomeTaskInProgress = taskInProgressIndex >= 0;
 
   return (
-    <List>
+    <List className="task-list">
       <DndContainer dragHandleSelector=".drag-handle" lockAxis="y" onDrop={onDrop}>
         {tasks.map((task, taskIndex) => {
           const taskId = `task-${taskIndex}`;
           return (
-            <Draggable key={taskId}>
+            <Draggable key={taskId} className="draggable" >
               <ListItem>
                 <ListItemIcon className="drag-handle">
                   <DragHandleIcon />
@@ -104,7 +105,7 @@ export default function TaskPlannerView({
                 {taskPlannerState === 'working' ? (
                   <>{formatRemainingTime(tasks[taskIndex], nowFn(), tomatoWorkDurationMinutes, tomatoRestDurationMinutes)}</>
                 ) : null}
-                {taskPlannerState === 'working' && !isTaskInProgress && taskIndex === taskIndexToFocus ? (
+                {taskPlannerState === 'working' && !isSomeTaskInProgress && taskIndex === taskIndexToFocus ? (
                   <>
                     &nbsp;<Button
                       variant="contained"

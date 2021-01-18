@@ -1,0 +1,15 @@
+/** Changing drag handle's mouse cursor during hovering and dragging */
+.drag-handle {
+  cursor: grab;
+}
+.smooth-dnd-no-user-select .drag-handle {
+  cursor: grabbing;
+}
+
+/** Moving drag handles to the left of the main list */
+.task-list li {
+  margin-left: -72px;
+}
+.smooth-dnd-container.vertical > .smooth-dnd-draggable-wrapper {
+  overflow: visible;
+}

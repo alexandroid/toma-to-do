@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 //import logo from './logo.svg';
-//import './App.css';
+import './App.css';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
@@ -10,22 +10,6 @@ import { Route, Switch, Link as RouteLink } from 'react-router-dom';
 import TaskPlannerController from './task-planner';
 import { BLANK_TASK, DEFAULT_REST_DURATION_MINS, DEFAULT_WORK_DURATION_MINS, TaskFocusIndex } from './data-model';
 import { PropTypes, TextField } from '@material-ui/core';
-
-function SettingsButton() {
-  return (
-    <Button variant="contained" color="default" startIcon={<SettingsIcon />} component={RouteLink} to={"/settings"}>
-      Settings
-    </Button>
-  );
-}
-
-function PlanTasksButton({ color }: { color: PropTypes.Color; }) {
-  return (
-    <Button variant="contained" color={color} component={RouteLink} to={"/"}>
-      Plan tasks
-    </Button>
-  );
-}
 
 function App() {
   // const [state, setState] = useState('planning' as State);
@@ -48,20 +32,19 @@ function App() {
           <Container>
             <h1>Settings</h1>
             <TextField
-              variant="filled"
               type="number"
               value={tomatoWorkDurationMinutes}
               onChange={(e) => setTomatoWorkDurationMinutes(parseInt(e.target.value))}
               label="Work duration, minutes"
             /><br />&nbsp;<br />
             <TextField
-              variant="filled"
               type="number"
               value={tomatoRestDurationMinutes}
               onChange={(e) => setTomatoRestDurationMinutes(parseInt(e.target.value))}
               label="Rest duration, minutes"
             /><br />&nbsp;<br />
             <Button
+              id="settings-reset"
               variant="contained"
               color="secondary"
               disabled={tomatoWorkDurationMinutes === DEFAULT_WORK_DURATION_MINS && tomatoRestDurationMinutes === DEFAULT_REST_DURATION_MINS}
@@ -69,9 +52,9 @@ function App() {
                 setTomatoWorkDurationMinutes(DEFAULT_WORK_DURATION_MINS);
                 setTomatoRestDurationMinutes(DEFAULT_REST_DURATION_MINS);
               }}>
-              Reset to 25/5
-              </Button>&nbsp;
-              <PlanTasksButton color="primary" />
+              Reset to {DEFAULT_WORK_DURATION_MINS}/{DEFAULT_REST_DURATION_MINS}
+            </Button>
+            <PlanTasksButton color="primary" />
           </Container>
         </Route>
         <Route path="/" exact={true}>
@@ -86,10 +69,10 @@ function App() {
               tomatoWorkDurationMinutes={tomatoWorkDurationMinutes}
               tomatoRestDurationMinutes={tomatoRestDurationMinutes}
             /><br />
-            <SettingsButton />&nbsp;
-              <Button variant="contained" color="primary" component={RouteLink} to={"/working"}>
-                Work on tasks
-              </Button>
+            <SettingsButton />
+            <Button variant="contained" color="primary" component={RouteLink} to={"/working"}>
+              Work on tasks
+            </Button>
           </Container>
         </Route>
         <Route path="/working">
@@ -104,12 +87,27 @@ function App() {
               tomatoWorkDurationMinutes={tomatoWorkDurationMinutes}
               tomatoRestDurationMinutes={tomatoRestDurationMinutes}
             /><br />
-            <SettingsButton />&nbsp;
             <PlanTasksButton color="default" />
           </Container>
         </Route>
       </Switch>
     </CssBaseline>
+  );
+}
+
+function SettingsButton() {
+  return (
+    <Button id="settings-btn" variant="contained" color="default" startIcon={<SettingsIcon />} component={RouteLink} to={"/settings"}>
+      Settings
+    </Button>
+  );
+}
+
+function PlanTasksButton({ color }: { color: PropTypes.Color; }) {
+  return (
+    <Button variant="contained" color={color} component={RouteLink} to={"/"}>
+      Plan tasks
+    </Button>
   );
 }
 
