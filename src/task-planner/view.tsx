@@ -44,8 +44,12 @@ export default function TaskPlannerView({
   onRemoveTomatoClick,
   onStartWorkingRestingClick,
 }: TaskPlannerViewProps) {
-  const taskInProgressIndex = tasks.findIndex(task => task.executionOrRestEndTime !== undefined);
-  const isSomeTaskInProgress = taskInProgressIndex >= 0;
+  const taskTimerInProgressIndex = tasks.findIndex(task => task.executionOrRestEndTime !== undefined);
+  const isSomeTaskTimerInProgress = taskTimerInProgressIndex >= 0;
+  const taskBeingWorkedOnIndex = taskTimerInProgressIndex >= 0
+    ? taskTimerInProgressIndex
+    : tasks.findIndex(task => task.taskNextStep === 'rest');
+  const isSomeTaskBeingWorkedOn = taskBeingWorkedOnIndex >= 0;
 
   return (
     <List className="task-list">
@@ -87,36 +91,45 @@ export default function TaskPlannerView({
                       onClick={() => onRemoveTomatoClick(taskIndex)}>
                         <RemoveIcon />
                     </IconButton>
+                    <TaskTomatoes task={task} taskIndex={taskIndex} />
                   </>
                 ): /* taskPlannerState === 'working' at this point */ (
-                  <Typography>
-                    <span
-                      tabIndex={0} // enables tab selection for non-input elements
-                      onKeyDown={(e) => onKeyDown(e, taskIndex)}
-                      onFocus={(e) => onFocus(e, taskIndex)}
-                      onBlur={(e) => onBlur(e, taskIndex)}
-                      ref={elem => elem && taskIndex === taskIndexToFocus && elem.focus()}
-                    >
-                      {task.objective}
-                    </span>
-                  </Typography>
-                ) }
-                <TaskTomatoes task={task} taskIndex={taskIndex} />
-                {taskPlannerState === 'working' ? (
-                  <>{formatRemainingTime(tasks[taskIndex], nowFn(), tomatoWorkDurationMinutes, tomatoRestDurationMinutes)}</>
-                ) : null}
-                {taskPlannerState === 'working' && !isSomeTaskInProgress && taskIndex === taskIndexToFocus ? (
                   <>
-                    &nbsp;<Button
-                      variant="contained"
-                      color="default"
-                      component="button"
-                      onClick={() => onStartWorkingRestingClick(taskIndex)}
-                      >{
-                        task.taskNextStep === 'work' ? 'Start working' : 'Start resting'
-                      }</Button>
+                    <Typography>
+                      <span
+                        tabIndex={0} // enables tab selection for non-input elements
+                        onKeyDown={(e) => onKeyDown(e, taskIndex)}
+                        onFocus={(e) => onFocus(e, taskIndex)}
+                        onBlur={(e) => onBlur(e, taskIndex)}
+                        ref={elem => elem && taskIndex === taskIndexToFocus && elem.focus()}
+                      >
+                        {task.objective}
+                      </span>
+                    </Typography>
+                    <TaskTomatoes task={task} taskIndex={taskIndex} />
+                    {(isSomeTaskBeingWorkedOn && taskIndex == taskBeingWorkedOnIndex) ||
+                     (!isSomeTaskBeingWorkedOn && taskIndex === taskIndexToFocus) ? (
+                      formatRemainingTime(tasks[taskIndex], nowFn(), tomatoWorkDurationMinutes, tomatoRestDurationMinutes)
+                    ) : null}
+                    {isSomeTaskTimerInProgress && taskIndex == taskBeingWorkedOnIndex
+                      ? task.taskNextStep === 'work' ? ' (resting)' : ' (working)'
+                    : null}
+                    {!isSomeTaskTimerInProgress &&
+                     ((isSomeTaskBeingWorkedOn && taskIndex == taskBeingWorkedOnIndex) ||
+                     (!isSomeTaskBeingWorkedOn && taskIndex === taskIndexToFocus)) ? (
+                      <>
+                        &nbsp;<Button
+                          variant="contained"
+                          color="default"
+                          component="button"
+                          onClick={() => onStartWorkingRestingClick(taskIndex)}
+                          >{
+                            task.taskNextStep === 'work' ? 'Start working' : 'Start resting'
+                          }</Button>
+                      </>
+                    ) : null}
                   </>
-                ) : null}
+                ) }
               </ListItem>
             </Draggable>
           );
