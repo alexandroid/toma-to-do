@@ -1,6 +1,6 @@
 import React from 'react';
 import { Task, TaskFocusIndex, TaskPlannerState } from '../data-model';
-import { Button, IconButton, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
+import { Box, BoxProps, Button, IconButton, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
 import { Container as DndContainer, Draggable, DropResult } from 'react-smooth-dnd';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
 import AddIcon from '@material-ui/icons/Add';
@@ -109,16 +109,19 @@ export default function TaskPlannerView({
                     <TaskTomatoes task={task} taskIndex={taskIndex} />
                     {(isSomeTaskBeingWorkedOn && taskIndex === taskBeingWorkedOnIndex) ||
                      (!isSomeTaskBeingWorkedOn && taskIndex === taskIndexToFocus) ? (
-                      formatRemainingTime(tasks[taskIndex], nowFn(), tomatoWorkDurationMinutes, tomatoRestDurationMinutes)
-                    ) : null}
-                    {isSomeTaskTimerInProgress && taskIndex === taskBeingWorkedOnIndex
-                      ? task.taskNextStep === 'work' ? ' (resting)' : ' (working)'
-                    : null}
+                      <RemainingTime
+                        id="task-remaining-time"
+                        task={tasks[taskIndex]}
+                        nowFn={nowFn}
+                        tomatoWorkDurationMinutes={tomatoWorkDurationMinutes}
+                        tomatoRestDurationMinutes={tomatoRestDurationMinutes}
+                      />) : null}
                     {!isSomeTaskTimerInProgress &&
                      ((isSomeTaskBeingWorkedOn && taskIndex === taskBeingWorkedOnIndex) ||
                      (!isSomeTaskBeingWorkedOn && taskIndex === taskIndexToFocus)) ? (
                       <>
                         &nbsp;<Button
+                          id="start-working-btn"
                           variant="contained"
                           color="default"
                           component="button"
@@ -175,13 +178,40 @@ function TaskTomatoes({ task, taskIndex }: { task: Task, taskIndex: number }) {
   );
 }
 
+function RemainingTime({ id, className, task, tomatoWorkDurationMinutes, tomatoRestDurationMinutes, nowFn } : {
+  task: Task;
+  tomatoWorkDurationMinutes: number;
+  tomatoRestDurationMinutes: number;
+  nowFn: () => number;
+} & Pick<BoxProps, 'id' | 'className'>) {
+  const currentTimeMs = nowFn();
+  if (task.executionOrRestEndTime !== undefined) {
+    const suffix = task.taskNextStep === 'work' ? ' (resting)' : ' (working)';
+    // task's timer is in progress:
+    return (
+      <Box id={id} className={className} component="span">
+        {formatTimeDifference(task.executionOrRestEndTime - currentTimeMs)}{suffix}
+      </Box>
+    )
+  }
+
+  const durationToDisplayMins = task.taskNextStep === 'work'
+    ? tomatoWorkDurationMinutes
+    : tomatoRestDurationMinutes;
+  return (
+    <Box id={id} className={className} component="span">
+      {formatTimeDifference(durationToDisplayMins * 60 * 1000)}
+    </Box>
+  );
+}
+
 function formatRemainingTime(
   task: Task,
-  currentTimeMs: number | undefined,
+  currentTimeMs: number,
   tomatoWorkDurationMinutes: number,
-  tomatoRestDurationMinutes: number
+  tomatoRestDurationMinutes: number,
 ) {
-  if (task.executionOrRestEndTime !== undefined && currentTimeMs !== undefined) {
+  if (task.executionOrRestEndTime !== undefined) {
     // console.info(`End time is ${task.executionOrRestEndTime}, diff: ${task.executionOrRestEndTime - currentTimeMs}, currentTimeMs: ${currentTimeMs}, now: ${Date.now()}`);
     return formatTimeDifference(task.executionOrRestEndTime - currentTimeMs);
   }

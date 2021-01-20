@@ -13,3 +13,11 @@
 .smooth-dnd-container.vertical > .smooth-dnd-draggable-wrapper {
   overflow: visible;
 }
+
+#start-working-btn {
+  margin-left: 1em;
+}
+
+#task-remaining-time {
+  margin-left: 0.6em;
+}
