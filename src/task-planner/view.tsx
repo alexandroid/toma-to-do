@@ -107,15 +107,15 @@ export default function TaskPlannerView({
                       </span>
                     </Typography>
                     <TaskTomatoes task={task} taskIndex={taskIndex} />
-                    {(isSomeTaskBeingWorkedOn && taskIndex == taskBeingWorkedOnIndex) ||
+                    {(isSomeTaskBeingWorkedOn && taskIndex === taskBeingWorkedOnIndex) ||
                      (!isSomeTaskBeingWorkedOn && taskIndex === taskIndexToFocus) ? (
                       formatRemainingTime(tasks[taskIndex], nowFn(), tomatoWorkDurationMinutes, tomatoRestDurationMinutes)
                     ) : null}
-                    {isSomeTaskTimerInProgress && taskIndex == taskBeingWorkedOnIndex
+                    {isSomeTaskTimerInProgress && taskIndex === taskBeingWorkedOnIndex
                       ? task.taskNextStep === 'work' ? ' (resting)' : ' (working)'
                     : null}
                     {!isSomeTaskTimerInProgress &&
-                     ((isSomeTaskBeingWorkedOn && taskIndex == taskBeingWorkedOnIndex) ||
+                     ((isSomeTaskBeingWorkedOn && taskIndex === taskBeingWorkedOnIndex) ||
                      (!isSomeTaskBeingWorkedOn && taskIndex === taskIndexToFocus)) ? (
                       <>
                         &nbsp;<Button
